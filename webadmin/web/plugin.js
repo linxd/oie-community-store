@@ -2241,12 +2241,12 @@ function errText(e) {
   return text;
 }
 var TYPE_LABELS = {
-  connector: "Connector",
-  plugin: "Plugin",
-  datatype: "Data Type",
-  channel: "Channel",
-  "code-template-library": "Code Template Library",
-  "code-template": "Code Template"
+  connector: "连接器",
+  plugin: "插件",
+  datatype: "数据类型",
+  channel: "通道",
+  "code-template-library": "代码模板库",
+  "code-template": "代码模板"
 };
 var TYPE_ORDER = ["connector", "plugin", "datatype", "channel", "code-template-library", "code-template"];
 var typeRank = (t) => {
@@ -2277,7 +2277,7 @@ function setPref(key, value) {
   } catch (e) {
   }
 }
-function ConfirmOverlay({ title, children, confirmLabel, onConfirm, secondaryLabel, onSecondary, onCancel, busy, loading, error, documentation = false, inactive = false, closeLabel = "Close documentation" }) {
+function ConfirmOverlay({ title, children, confirmLabel, onConfirm, secondaryLabel, onSecondary, onCancel, busy, loading, error, documentation = false, inactive = false, closeLabel = "关闭文档" }) {
   const dialog = React.useRef(null);
   const titleId = React.useId();
   React.useEffect(() => {
@@ -2307,7 +2307,7 @@ function ConfirmOverlay({ title, children, confirmLabel, onConfirm, secondaryLab
       first.focus();
     }
   };
-  return /* @__PURE__ */ React.createElement("div", { className: "cs-overlay", style: inactive ? { display: "none" } : void 0 }, /* @__PURE__ */ React.createElement("div", { className: `panel cs-dialog ${documentation ? "cs-documentation-dialog" : ""}`, role: "dialog", "aria-modal": "true", "aria-labelledby": titleId, ref: dialog, tabIndex: -1, onKeyDown }, /* @__PURE__ */ React.createElement("div", { className: "panel-header", id: titleId }, title, documentation ? /* @__PURE__ */ React.createElement("button", { className: "btn btn-sm", onClick: onCancel, "aria-label": closeLabel }, "Close") : null), /* @__PURE__ */ React.createElement("div", { className: "panel-body" }, children, loading ? /* @__PURE__ */ React.createElement("p", { role: "status" }, "Loading libraries\u2026") : null, error ? /* @__PURE__ */ React.createElement("p", { role: "alert", className: "cs-notice error" }, error) : null, !documentation ? /* @__PURE__ */ React.createElement("div", { className: "cs-dialog-actions" }, /* @__PURE__ */ React.createElement("button", { className: "btn", onClick: () => onCancel(), disabled: busy }, "Cancel"), secondaryLabel ? /* @__PURE__ */ React.createElement("button", { className: "btn btn-danger", onClick: () => onSecondary(), disabled: busy || loading }, secondaryLabel) : null, /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary", onClick: () => onConfirm(), disabled: busy || loading }, busy ? "Working\u2026" : confirmLabel)) : null)));
+  return /* @__PURE__ */ React.createElement("div", { className: "cs-overlay", style: inactive ? { display: "none" } : void 0 }, /* @__PURE__ */ React.createElement("div", { className: `panel cs-dialog ${documentation ? "cs-documentation-dialog" : ""}`, role: "dialog", "aria-modal": "true", "aria-labelledby": titleId, ref: dialog, tabIndex: -1, onKeyDown }, /* @__PURE__ */ React.createElement("div", { className: "panel-header", id: titleId }, title, documentation ? /* @__PURE__ */ React.createElement("button", { className: "btn btn-sm", onClick: onCancel, "aria-label": closeLabel }, "关闭") : null), /* @__PURE__ */ React.createElement("div", { className: "panel-body" }, children, loading ? /* @__PURE__ */ React.createElement("p", { role: "status" }, "正在加载库\u2026") : null, error ? /* @__PURE__ */ React.createElement("p", { role: "alert", className: "cs-notice error" }, error) : null, !documentation ? /* @__PURE__ */ React.createElement("div", { className: "cs-dialog-actions" }, /* @__PURE__ */ React.createElement("button", { className: "btn", onClick: () => onCancel(), disabled: busy }, "取消"), secondaryLabel ? /* @__PURE__ */ React.createElement("button", { className: "btn btn-danger", onClick: () => onSecondary(), disabled: busy || loading }, secondaryLabel) : null, /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary", onClick: () => onConfirm(), disabled: busy || loading }, busy ? "处理中\u2026" : confirmLabel)) : null)));
 }
 function useStoreActions(refresh, onComplete) {
   const [confirm, setConfirm] = React.useState(null);
@@ -2330,14 +2330,14 @@ function useStoreActions(refresh, onComplete) {
     const request = ++pickerRequest.current;
     setLoadingLibraries(true);
     setLibMode("new");
-    setNewLib(entry.name || "Community Store");
+    setNewLib(entry.name || "社区商店");
     setExistingLib("");
     setLibraries([]);
     try {
       const result = normalizeLibraries(await apiGet("/codeTemplateLibraries"));
       if (request === pickerRequest.current) setLibraries(result);
     } catch (e) {
-      if (request === pickerRequest.current) setActionError("Could not load existing libraries. You can create a new library, or cancel and retry. " + errText(e));
+      if (request === pickerRequest.current) setActionError("无法加载现有库。您可以创建新库，或取消后重试。" + errText(e));
     } finally {
       if (request === pickerRequest.current) setLoadingLibraries(false);
     }
@@ -2368,7 +2368,7 @@ function useStoreActions(refresh, onComplete) {
     try {
       if (mode === "remove") {
         await apiPost(`${BASE}/_removeContent`, { id: entry.id });
-        toast(`Removed ${entry.name} from this engine.`, "success");
+        toast(`已从此引擎移除 ${entry.name}。`, "success");
         onComplete?.({ entry, mode, restartRequired: false });
         setConfirm(null);
         await refresh(false);
@@ -2384,18 +2384,18 @@ function useStoreActions(refresh, onComplete) {
         if (entry.type === "code-template" && (mode === "copy" || mode === "install" && !entry.installedVersion)) {
           if (libMode === "existing") {
             if (!existingLib) {
-              toast("Choose a library to add this code template to.", "warn");
+              toast("请选择要将此代码模板添加到的库。", "warn");
               setBusy(false);
               return;
             }
             body.targetLibraryId = existingLib;
           } else {
-            body.newLibrary = (newLib || "").trim() || "Community Store";
+            body.newLibrary = (newLib || "").trim() || "社区商店";
           }
         }
         const result = await apiPost(`${BASE}/_install`, body);
         onComplete?.({ entry, mode, restartRequired: !!result.restartRequired });
-        toast(mode === "upgrade" ? entry.updateAvailable ? `Upgraded ${entry.name} to v${entry.version}.` : `Re-imported ${entry.name}.` : mode === "copy" ? `Imported ${entry.name} as a copy.` : content ? `Imported ${entry.name}. It's available now.` : `Installed ${entry.name} ${entry.version}. Restart the engine to activate it.`, "success");
+        toast(mode === "upgrade" ? entry.updateAvailable ? `已将 ${entry.name} 升级到 v${entry.version}。` : `已重新导入 ${entry.name}。` : mode === "copy" ? `已将 ${entry.name} 作为副本导入。` : content ? `Imported ${entry.name}. It's available now.` : `已安装 ${entry.name} ${entry.version}。请重启引擎以激活。`, "success");
         if (!content) {
           try {
             window.dispatchEvent(new Event("webadmin:restart-pending"));
@@ -2419,15 +2419,15 @@ function useStoreActions(refresh, onComplete) {
     overlay = /* @__PURE__ */ React.createElement(
       ConfirmOverlay,
       {
-        title: `Remove ${entry.name}?`,
-        confirmLabel: "Remove",
+        title: `移除 ${entry.name}？`,
+        confirmLabel: "移除",
         busy,
         loading: loadingLibraries,
         error: actionError,
         onCancel: () => choose(null),
         onConfirm: () => execute("remove")
       },
-      /* @__PURE__ */ React.createElement("div", null, entry.type === "code-template-library" ? /* @__PURE__ */ React.createElement("p", null, "Deletes the library ", /* @__PURE__ */ React.createElement("strong", null, entry.name), " and ", /* @__PURE__ */ React.createElement("strong", null, "all code templates it currently contains"), " \u2014 including any you added to it after installing.") : /* @__PURE__ */ React.createElement("p", null, "Deletes the code template ", /* @__PURE__ */ React.createElement("strong", null, entry.name), " from this engine, including its library membership. The library itself is kept", entry.revoked ? "." : ", and the package stays in Browse if you want to re-import it later."))
+      /* @__PURE__ */ React.createElement("div", null, entry.type === "code-template-library" ? /* @__PURE__ */ React.createElement("p", null, "删除库 ", /* @__PURE__ */ React.createElement("strong", null, entry.name), " and ", /* @__PURE__ */ React.createElement("strong", null, "all code templates it currently contains"), " \u2014 including any you added to it after installing.") : /* @__PURE__ */ React.createElement("p", null, "删除代码模板 ", /* @__PURE__ */ React.createElement("strong", null, entry.name), " from this engine, including its library membership. The library itself is kept", entry.revoked ? "." : ", and the package stays in Browse if you want to re-import it later."))
     );
   } else if (confirm && confirm.mode === "modified-choice") {
     const entry = confirm.entry;
@@ -2436,9 +2436,9 @@ function useStoreActions(refresh, onComplete) {
     overlay = /* @__PURE__ */ React.createElement(
       ConfirmOverlay,
       {
-        title: `${entry.updateAvailable ? "Update" : "Re-import"} ${entry.name}?`,
-        confirmLabel: "Install as new copy",
-        secondaryLabel: "Overwrite",
+        title: `${entry.updateAvailable ? "更新" : "重新导入"} ${entry.name}?`,
+        confirmLabel: "作为新副本安装",
+        secondaryLabel: "覆写",
         busy,
         loading: loadingLibraries,
         error: actionError,
@@ -2446,7 +2446,7 @@ function useStoreActions(refresh, onComplete) {
         onSecondary: () => execute("upgrade", true),
         onConfirm: () => requestCopy(entry)
       },
-      /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("p", null, untracked ? `This ${noun} was installed using an older change-tracking format \u2014 the store can't tell whether you've modified it.` : `You've modified this ${noun} since installing it.`), /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Overwrite"), " replaces ", untracked ? "whatever is there" : "your changes", " with version ", entry.version, ".", " ", /* @__PURE__ */ React.createElement("strong", null, "Install as new copy"), " keeps ", untracked ? "what's installed" : "yours", " and imports version ", entry.version, " as a separate ", noun, entry.type === "code-template" ? " (you'll choose a library for it)" : "", "."))
+      /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("p", null, untracked ? `此 ${noun} 使用旧版变更跟踪格式安装—商店无法判断您是否已修改它。` : `您在安装此 ${noun} 后对其进行了修改。`), /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "覆盖"),  " 替换为 ", untracked ? "其内容" : "您的更改",  "，版本为 ", entry.version, ".", " ", /* @__PURE__ */ React.createElement("strong", null, "作为新副本安装"),  " 保留 ", untracked ? "已安装的内容" : "您的",  " 并导入版本 ", entry.version,  " 为独立的 ", noun, entry.type === "code-template" ?  "（您将为其选择一个库）" : "", "."))
     );
   } else if (confirm && confirm.mode === "upgrade") {
     const entry = confirm.entry;
@@ -2454,15 +2454,15 @@ function useStoreActions(refresh, onComplete) {
     overlay = /* @__PURE__ */ React.createElement(
       ConfirmOverlay,
       {
-        title: reimport ? `Re-import ${entry.name}?` : `Update ${entry.name} to v${entry.version}?`,
-        confirmLabel: reimport ? "Re-import" : `Update to v${entry.version}`,
+        title: reimport ? `重新导入 ${entry.name}？` : `将 ${entry.name} 更新到 v${entry.version}？`,
+        confirmLabel: reimport ? "重新导入" : `更新到 v${entry.version}`,
         busy,
         loading: loadingLibraries,
         error: actionError,
         onCancel: () => choose(null),
         onConfirm: () => execute()
       },
-      /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("p", null, "Replaces the installed ", TYPE_LABELS[entry.type] || entry.type, " ", /* @__PURE__ */ React.createElement("strong", null, entry.name), " in place with version ", entry.version, " from ", /* @__PURE__ */ React.createElement("span", { className: "mono" }, entry.repo), " (", entry.tag, ").", entry.type === "code-template" ? " Its library membership is kept, and it" : " It", " takes effect immediately \u2014 no engine restart."))
+      /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("p", null, "将已安装的 ", TYPE_LABELS[entry.type] || entry.type, " ", /* @__PURE__ */ React.createElement("strong", null, entry.name), " 原地替换为版本 ", entry.version, " 来自 ", /* @__PURE__ */ React.createElement("span", { className: "mono" }, entry.repo), " (", entry.tag, ").", entry.type === "code-template" ?  "其库成员关系保留，并且它" :  "它", " 立即生效——无需引擎重启。"))
     );
   } else if (confirm) {
     const entry = confirm.entry;
@@ -2472,25 +2472,25 @@ function useStoreActions(refresh, onComplete) {
     overlay = /* @__PURE__ */ React.createElement(
       ConfirmOverlay,
       {
-        title: copy ? `Install ${entry.name} as a copy?` : `${content ? entry.updateAvailable ? "Update" : "Import" : "Install"} ${entry.name}?`,
-        confirmLabel: copy ? "Install as copy" : content ? entry.updateAvailable ? `Update to ${entry.version}` : "Import" : `Install ${entry.version}`,
+        title: copy ? `将 ${entry.name} 作为副本安装？` : `${content ? entry.updateAvailable ? "更新" : "导入" : "安装"} ${entry.name}?`,
+        confirmLabel: copy ? "作为副本安装" : content ? entry.updateAvailable ? `更新到 ${entry.version}` : "导入" : `安装 ${entry.version}`,
         busy,
         loading: loadingLibraries,
         error: actionError,
         onCancel: () => choose(null),
         onConfirm: () => execute()
       },
-      /* @__PURE__ */ React.createElement("div", null, copy ? /* @__PURE__ */ React.createElement("p", null, "Imports the ", TYPE_LABELS[entry.type] || entry.type, " ", /* @__PURE__ */ React.createElement("strong", null, entry.name), " version ", entry.version, " from", " ", /* @__PURE__ */ React.createElement("span", { className: "mono" }, entry.repo), " (", entry.tag, ") as a new copy with a fresh id", entry.installedVersion ? " \u2014 what you have installed is left untouched" : "", ". The copy is yours: the store does not track or update it.") : content ? /* @__PURE__ */ React.createElement("p", null, "Imports the ", TYPE_LABELS[entry.type] || entry.type, " ", /* @__PURE__ */ React.createElement("strong", null, entry.name), " from", " ", /* @__PURE__ */ React.createElement("span", { className: "mono" }, entry.repo), " (", entry.tag, "). It takes effect immediately \u2014 no engine restart.") : /* @__PURE__ */ React.createElement("p", null, "This installs ", /* @__PURE__ */ React.createElement("span", { className: "mono" }, entry.repo), " release", " ", /* @__PURE__ */ React.createElement("span", { className: "mono" }, entry.tag), " into the engine's extensions directory after sha256 verification."), wantsLibrary ? /* @__PURE__ */ React.createElement("div", { className: "mt-3" }, /* @__PURE__ */ React.createElement("div", { className: "text-text-dim mb-1" }, "Add to library:"), /* @__PURE__ */ React.createElement("label", { className: "flex items-center gap-2 mb-1", style: { cursor: "pointer" } }, /* @__PURE__ */ React.createElement("input", { type: "radio", name: "cs-lib", checked: libMode === "new", onChange: () => setLibMode("new") }), "Create new library:", /* @__PURE__ */ React.createElement(
+      /* @__PURE__ */ React.createElement("div", null, copy ? /* @__PURE__ */ React.createElement("p", null, "导入 ", TYPE_LABELS[entry.type] || entry.type, " ", /* @__PURE__ */ React.createElement("strong", null, entry.name), " 版本 ", entry.version, " 来自", " ", /* @__PURE__ */ React.createElement("span", { className: "mono" }, entry.repo), " (", entry.tag, ")，为新副本，使用新 id", entry.installedVersion ? " \u2014 what you have installed is left untouched" : "", "。该副本归您所有：商店不会跟踪或更新它。") : content ? /* @__PURE__ */ React.createElement("p", null, "导入 ", TYPE_LABELS[entry.type] || entry.type, " ", /* @__PURE__ */ React.createElement("strong", null, entry.name), " 来自", " ", /* @__PURE__ */ React.createElement("span", { className: "mono" }, entry.repo), " (", entry.tag, "). 立即生效——无需引擎重启。") : /* @__PURE__ */ React.createElement("p", null, "此操作将安装 ", /* @__PURE__ */ React.createElement("span", { className: "mono" }, entry.repo), " 发布", " ", /* @__PURE__ */ React.createElement("span", { className: "mono" }, entry.tag), " 到引擎的扩展目录（经 sha256 校验）。"), wantsLibrary ? /* @__PURE__ */ React.createElement("div", { className: "mt-3" }, /* @__PURE__ */ React.createElement("div", { className: "text-text-dim mb-1" }, "添加到库："), /* @__PURE__ */ React.createElement("label", { className: "flex items-center gap-2 mb-1", style: { cursor: "pointer" } }, /* @__PURE__ */ React.createElement("input", { type: "radio", name: "cs-lib", checked: libMode === "new", onChange: () => setLibMode("new") }), "创建新库：", /* @__PURE__ */ React.createElement(
         "input",
         {
           className: "field",
           style: { maxWidth: 220 },
           value: newLib,
-          placeholder: "Library name",
+          placeholder: "库名称",
           onFocus: () => setLibMode("new"),
           onChange: (e) => setNewLib(e.target.value)
         }
-      )), /* @__PURE__ */ React.createElement("label", { className: "flex items-center gap-2", style: { cursor: libraries.length ? "pointer" : "default" } }, /* @__PURE__ */ React.createElement("input", { type: "radio", name: "cs-lib", checked: libMode === "existing", disabled: !libraries.length, onChange: () => setLibMode("existing") }), "Existing library:", /* @__PURE__ */ React.createElement(
+      )), /* @__PURE__ */ React.createElement("label", { className: "flex items-center gap-2", style: { cursor: libraries.length ? "pointer" : "default" } }, /* @__PURE__ */ React.createElement("input", { type: "radio", name: "cs-lib", checked: libMode === "existing", disabled: !libraries.length, onChange: () => setLibMode("existing") }), "现有库：", /* @__PURE__ */ React.createElement(
         "select",
         {
           className: "field",
@@ -2502,9 +2502,9 @@ function useStoreActions(refresh, onComplete) {
             setLibMode("existing");
           }
         },
-        /* @__PURE__ */ React.createElement("option", { value: "" }, libraries.length ? "Select a library\u2026" : "No libraries yet"),
+        /* @__PURE__ */ React.createElement("option", { value: "" }, libraries.length ? "选择库\u2026" : "暂无库"),
         libraries.map((l) => /* @__PURE__ */ React.createElement("option", { key: l.id, value: l.id }, l.name))
-      ))) : null, /* @__PURE__ */ React.createElement("p", { className: "hint mt-2" }, "Community content is published by third parties and is not vetted by the Open Integration Engine project. Installing runs its code in the engine. Install only from publishers you trust."))
+      ))) : null, /* @__PURE__ */ React.createElement("p", { className: "hint mt-2" }, "社区内容由第三方发布，未经 Open Integration Engine 项目审核。安装会在引擎中运行其代码。请仅从您信任的发布者处安装。"))
     );
   }
   return { requestInstall, requestUpdate, requestCopy, requestRemove, overlay, busy };
@@ -2539,7 +2539,7 @@ function DocsPanel({ entry }) {
       return null;
     }
   }, [docs]);
-  return /* @__PURE__ */ React.createElement("div", { className: "panel mt-3" }, /* @__PURE__ */ React.createElement("div", { className: "panel-header flex items-center gap-2" }, "Documentation", docs && docs.found ? /* @__PURE__ */ React.createElement("span", { className: "mono text-text-dim", style: { fontSize: "0.85em" } }, docs.path, " @ ", docs.tag) : null), /* @__PURE__ */ React.createElement("div", { className: "panel-body" }, /* @__PURE__ */ React.createElement("style", null, DOCS_CSS), error ? /* @__PURE__ */ React.createElement("span", { className: "text-text-dim" }, "Could not load documentation: ", error) : null, !error && !docs ? /* @__PURE__ */ React.createElement("span", { className: "text-text-dim" }, "Loading documentation\u2026") : null, docs && !docs.found ? /* @__PURE__ */ React.createElement("span", { className: "text-text-dim" }, "This publisher provides no store documentation. Publishers can add a store.md (or README.md) to their repository; it renders here, pinned to the release tag.") : null, html2 ? /* @__PURE__ */ React.createElement("div", { className: "cs-docs", dangerouslySetInnerHTML: { __html: html2 } }) : null, docs && docs.truncated ? /* @__PURE__ */ React.createElement("div", { className: "hint mt-2" }, "Documentation was truncated. The full file is available in the repository.") : null));
+  return /* @__PURE__ */ React.createElement("div", { className: "panel mt-3" }, /* @__PURE__ */ React.createElement("div", { className: "panel-header flex items-center gap-2" }, "文档", docs && docs.found ? /* @__PURE__ */ React.createElement("span", { className: "mono text-text-dim", style: { fontSize: "0.85em" } }, docs.path, " @ ", docs.tag) : null), /* @__PURE__ */ React.createElement("div", { className: "panel-body" }, /* @__PURE__ */ React.createElement("style", null, DOCS_CSS), error ? /* @__PURE__ */ React.createElement("span", { className: "text-text-dim" }, "无法加载文档：", error) : null, !error && !docs ? /* @__PURE__ */ React.createElement("span", { className: "text-text-dim" }, "正在加载文档\u2026") : null, docs && !docs.found ? /* @__PURE__ */ React.createElement("span", { className: "text-text-dim" }, "此发布者未提供商店文档。发布者可以在其仓库中添加 store.md（或 README.md）；它将在此处渲染，绑定到发布标签。") : null, html2 ? /* @__PURE__ */ React.createElement("div", { className: "cs-docs", dangerouslySetInnerHTML: { __html: html2 } }) : null, docs && docs.truncated ? /* @__PURE__ */ React.createElement("div", { className: "hint mt-2" }, "文档已截断。完整文件可在仓库中查看。") : null));
 }
 var TYPE_ICONS = {
   "connector": "M8 2v6M16 2v6M5 8h14v4a7 7 0 0 1-14 0V8zM12 19v3",
@@ -2553,14 +2553,14 @@ function PackageIcon({ type }) {
   return /* @__PURE__ */ React.createElement("span", { className: "cs-icon", "aria-hidden": "true" }, /* @__PURE__ */ React.createElement("svg", { viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.7", strokeLinecap: "round", strokeLinejoin: "round" }, /* @__PURE__ */ React.createElement("path", { d: TYPE_ICONS[type] || TYPE_ICONS.plugin })));
 }
 function PackageStatus({ entry }) {
-  if (entry.revoked) return /* @__PURE__ */ React.createElement("span", { className: "cs-pill error" }, entry.revokedReason === "blocked" ? "Blocked by source" : "Removed from source");
-  if (entry.stagedVersion) return /* @__PURE__ */ React.createElement("span", { className: "cs-pill warn" }, "Restart pending");
-  if (entry.modified) return /* @__PURE__ */ React.createElement("span", { className: "cs-pill warn" }, entry.driftTracked === false ? "Changes unknown" : "Locally modified");
-  if (entry.updateAvailable) return /* @__PURE__ */ React.createElement("span", { className: "cs-pill update" }, "Update available");
-  if (!entry.compatible) return /* @__PURE__ */ React.createElement("span", { className: "cs-pill warn" }, "Incompatible");
-  if (entry.deprecated) return /* @__PURE__ */ React.createElement("span", { className: "cs-pill warn" }, "Deprecated");
-  if (entry.installedVersion) return /* @__PURE__ */ React.createElement("span", { className: "cs-pill ok" }, "Installed");
-  return /* @__PURE__ */ React.createElement("span", { className: "cs-pill" }, "Available to ", isContentType(entry.type) ? "import" : "install");
+  if (entry.revoked) return /* @__PURE__ */ React.createElement("span", { className: "cs-pill error" }, entry.revokedReason === "blocked" ? "被来源屏蔽" : "已从来源移除");
+  if (entry.stagedVersion) return /* @__PURE__ */ React.createElement("span", { className: "cs-pill warn" }, "待重启");
+  if (entry.modified) return /* @__PURE__ */ React.createElement("span", { className: "cs-pill warn" }, entry.driftTracked === false ? "变更未知" : "本地已修改");
+  if (entry.updateAvailable) return /* @__PURE__ */ React.createElement("span", { className: "cs-pill update" }, "有可用更新");
+  if (!entry.compatible) return /* @__PURE__ */ React.createElement("span", { className: "cs-pill warn" }, "不兼容");
+  if (entry.deprecated) return /* @__PURE__ */ React.createElement("span", { className: "cs-pill warn" }, "已废弃");
+  if (entry.installedVersion) return /* @__PURE__ */ React.createElement("span", { className: "cs-pill ok" }, "已安装");
+  return /* @__PURE__ */ React.createElement("span", { className: "cs-pill" }, "可", isContentType(entry.type) ? "导入" : "安装");
 }
 function safeExternalUrl(value) {
   try {
@@ -2574,43 +2574,43 @@ function ExternalLink({ href, children }) {
   const safe = safeExternalUrl(href);
   return safe ? /* @__PURE__ */ React.createElement("a", { href: safe, target: "_blank", rel: "noopener noreferrer" }, children) : null;
 }
-var DOWNLOAD_NOTE = "Downloads of matching installer ZIPs across retained GitHub releases, including prereleases. Repeat and automated downloads count; this is not an installation or user count. Renamed asset families and deleted releases are excluded.";
+var DOWNLOAD_NOTE = "在保留的 GitHub 发布中匹配的安装包 ZIP 下载量，包括预发布。重复和自动化下载计入统计；这不是安装量或用户数。已重命名的资产组和已删除的发布已排除。";
 var DOWNLOAD_ERRORS = {
-  unsupported_asset: "Download statistics are not published for this installer URL or filename.",
-  package_not_found: "This package is no longer in the catalog.",
-  revoked: "This package has been removed from its source.",
-  no_matching_assets: "No matching installer assets were found in GitHub releases.",
-  rate_limit_or_access_denied: "GitHub rate limit reached or repository access denied. Check the GitHub token in Store Settings; the lookup retries after five minutes.",
-  repository_not_found: "GitHub could not find or grant access to the repository.",
-  lookup_limit: "The release history could not be completely counted within the lookup limits.",
-  github_unreachable: "The engine could not reach GitHub. Check its network and TLS configuration.",
-  invalid_response: "GitHub returned an unexpected statistics response.",
-  interrupted: "The download lookup was interrupted."
+  unsupported_asset: "此安装包 URL 或文件名未发布下载统计。",
+  package_not_found: "此包已不在目录中。",
+  revoked: "此包已从其来源中移除。",
+  no_matching_assets: "在 GitHub 发布中未找到匹配的安装包资产。",
+  rate_limit_or_access_denied: "GitHub 速率限制已触发或仓库访问被拒绝。请在商店设置中检查 GitHub 令牌；查询将在五分钟后重试。",
+  repository_not_found: "GitHub 无法找到或授予仓库访问权限。",
+  lookup_limit: "在查询限制内无法完成发布历史记录的统计。",
+  github_unreachable: "引擎无法访问 GitHub。请检查其网络和 TLS 配置。",
+  invalid_response: "GitHub 返回了意外的统计响应。",
+  interrupted: "下载查询被中断。"
 };
 function metricFreshness(stats) {
-  return stats?.checkedAt ? `${stats.stale ? "Refresh failed; last successful count" : "Updated"}: ${new Date(stats.checkedAt).toLocaleString()}` : "Statistics have not been published by this catalog yet.";
+  return stats?.checkedAt ? `${stats.stale ? "刷新失败；上次成功统计" : "已更新"}: ${new Date(stats.checkedAt).toLocaleString()}` : "此目录尚未发布统计数据。";
 }
 function downloadError(entry) {
-  return DOWNLOAD_ERRORS[entry.downloads?.reason] || "This catalog has no download count for this package.";
+  return DOWNLOAD_ERRORS[entry.downloads?.reason] || "此目录没有此包的下载计数。";
 }
 function DownloadCount({ entry }) {
   const stats = entry.downloads;
-  return /* @__PURE__ */ React.createElement("span", { title: stats?.status === "available" ? `${DOWNLOAD_NOTE} ${metricFreshness(stats)}` : downloadError(entry) }, stats?.status === "available" && Number.isSafeInteger(stats.count) && stats.count >= 0 ? `${stats.count.toLocaleString()}${stats.stale ? " (stale)" : ""}` : "\u2014");
+  return /* @__PURE__ */ React.createElement("span", { title: stats?.status === "available" ? `${DOWNLOAD_NOTE} ${metricFreshness(stats)}` : downloadError(entry) }, stats?.status === "available" && Number.isSafeInteger(stats.count) && stats.count >= 0 ? `${stats.count.toLocaleString()}${stats.stale ? " (过期)" : ""}` : "\u2014");
 }
 function StarCount({ entry }) {
   const stats = entry.stars;
-  return /* @__PURE__ */ React.createElement("span", { title: `GitHub repository stars; packages sharing a repository share this count. ${metricFreshness(stats)}` }, stats?.status === "available" && Number.isSafeInteger(stats.count) && stats.count >= 0 ? `${stats.count.toLocaleString()}${stats.stale ? " (stale)" : ""}` : "\u2014");
+  return /* @__PURE__ */ React.createElement("span", { title: `GitHub 仓库星标；共享仓库的包共享此计数。 ${metricFreshness(stats)}` }, stats?.status === "available" && Number.isSafeInteger(stats.count) && stats.count >= 0 ? `${stats.count.toLocaleString()}${stats.stale ? " (过期)" : ""}` : "\u2014");
 }
 function DetailView({ entry, actions }) {
   const [docsOpen, setDocsOpen] = React.useState(true);
   React.useEffect(() => setDocsOpen(true), [entry?.id]);
-  if (!entry) return /* @__PURE__ */ React.createElement("aside", { className: "cs-detail" }, /* @__PURE__ */ React.createElement("h2", null, "Package details"), /* @__PURE__ */ React.createElement("p", { className: "cs-detail-description" }, "Select a package to review its compatibility, source, and installation options."));
+  if (!entry) return /* @__PURE__ */ React.createElement("aside", { className: "cs-detail" }, /* @__PURE__ */ React.createElement("h2", null, "包详情"), /* @__PURE__ */ React.createElement("p", { className: "cs-detail-description" }, "选择一个包以查看其兼容性、来源和安装选项。"));
   const content = isContentType(entry.type);
   const channelCopy = entry.type === "channel" && entry.installedVersion;
   const update = entry.updateAvailable || content && entry.installedVersion && !channelCopy;
   const actionable = canInstall() && entry.installable && entry.compatible && !entry.revoked && !entry.stagedVersion && (content || !entry.installedVersion || entry.updateAvailable);
-  const label = channelCopy ? "Import as copy" : update ? entry.updateAvailable ? `Review update to ${entry.version}` : "Review re-import" : content ? "Review import" : "Review installation";
-  return /* @__PURE__ */ React.createElement("aside", { className: "cs-detail", "aria-label": "Selected package" }, /* @__PURE__ */ React.createElement(PackageIcon, { type: entry.type }), /* @__PURE__ */ React.createElement("h2", null, entry.name), /* @__PURE__ */ React.createElement("div", { className: "cs-meta" }, TYPE_LABELS[entry.type] || entry.type, entry.authors?.length ? ` \xB7 by ${entry.authors.join(", ")}` : ""), /* @__PURE__ */ React.createElement("p", { className: "cs-detail-description" }, entry.description || "No description provided."), /* @__PURE__ */ React.createElement(PackageStatus, { entry }), /* @__PURE__ */ React.createElement("p", { className: "cs-footnote" }, DOWNLOAD_NOTE, " ", entry.downloads?.status !== "available" ? downloadError(entry) : ""), /* @__PURE__ */ React.createElement("dl", { className: "cs-facts" }, /* @__PURE__ */ React.createElement("div", { className: "cs-fact" }, /* @__PURE__ */ React.createElement("dt", null, "Offered version"), /* @__PURE__ */ React.createElement("dd", null, entry.revoked ? "Unavailable" : entry.version)), /* @__PURE__ */ React.createElement("div", { className: "cs-fact" }, /* @__PURE__ */ React.createElement("dt", null, "Installed version"), /* @__PURE__ */ React.createElement("dd", null, entry.installedVersion || "Not installed")), entry.stagedVersion ? /* @__PURE__ */ React.createElement("div", { className: "cs-fact" }, /* @__PURE__ */ React.createElement("dt", null, "Staged version"), /* @__PURE__ */ React.createElement("dd", null, entry.stagedVersion)) : null, /* @__PURE__ */ React.createElement("div", { className: "cs-fact" }, /* @__PURE__ */ React.createElement("dt", null, "Downloads \xB7 all versions"), /* @__PURE__ */ React.createElement("dd", null, /* @__PURE__ */ React.createElement(DownloadCount, { entry }), /* @__PURE__ */ React.createElement("div", { className: "cs-footnote" }, metricFreshness(entry.downloads)))), /* @__PURE__ */ React.createElement("div", { className: "cs-fact" }, /* @__PURE__ */ React.createElement("dt", null, "GitHub stars"), /* @__PURE__ */ React.createElement("dd", null, /* @__PURE__ */ React.createElement(StarCount, { entry }), /* @__PURE__ */ React.createElement("div", { className: "cs-footnote" }, metricFreshness(entry.stars)))), /* @__PURE__ */ React.createElement("div", { className: "cs-fact" }, /* @__PURE__ */ React.createElement("dt", null, "Engine compatibility"), /* @__PURE__ */ React.createElement("dd", null, entry.minEngineVersion || "Unspecified", entry.maxEngineVersion ? ` \u2013 ${entry.maxEngineVersion}` : entry.minEngineVersion ? "+" : ""))), entry.revoked ? /* @__PURE__ */ React.createElement("p", { className: "cs-notice error" }, "This package is no longer offered by its source. Review whether you still trust it.") : entry.stagedVersion ? /* @__PURE__ */ React.createElement("p", { className: "cs-notice warn" }, "Version ", entry.stagedVersion, " is staged. Restart the engine to activate it.") : !entry.compatible ? /* @__PURE__ */ React.createElement("p", { className: "cs-notice warn" }, "No compatible version is available for this engine.") : /* @__PURE__ */ React.createElement("p", { className: "cs-notice" }, content ? "Imported content is available immediately. No restart needed." : "Engine restart required after installation."), entry.modified ? /* @__PURE__ */ React.createElement("p", { className: "cs-notice warn" }, entry.driftTracked === false ? "Local changes are unknown with the previous tracking format." : "Local edits detected.", " Review before replacing this content. You can keep your changes by importing a copy.") : null, entry.deprecated ? /* @__PURE__ */ React.createElement("p", { className: "cs-notice warn" }, "Deprecated by the publisher", entry.deprecationMessage ? `: ${entry.deprecationMessage}` : ".") : null, entry.newerSnapshot ? /* @__PURE__ */ React.createElement("p", { className: "cs-notice" }, "Newer snapshot available: ", entry.newerSnapshot, ". Import as a copy to keep the installed channel.") : null, actionable ? /* @__PURE__ */ React.createElement(
+  const label = channelCopy ? "作为副本导入" : update ? entry.updateAvailable ? `审核更新到 ${entry.version}` : "审核重新导入" : content ? "审核导入" : "审核安装";
+  return /* @__PURE__ */ React.createElement("aside", { className: "cs-detail", "aria-label": "已选包" }, /* @__PURE__ */ React.createElement(PackageIcon, { type: entry.type }), /* @__PURE__ */ React.createElement("h2", null, entry.name), /* @__PURE__ */ React.createElement("div", { className: "cs-meta" }, TYPE_LABELS[entry.type] || entry.type, entry.authors?.length ? ` \xB7 ${entry.authors.join(", ")}` : ""), /* @__PURE__ */ React.createElement("p", { className: "cs-detail-description" }, entry.description || "未提供描述。"), /* @__PURE__ */ React.createElement(PackageStatus, { entry }), /* @__PURE__ */ React.createElement("p", { className: "cs-footnote" }, DOWNLOAD_NOTE, " ", entry.downloads?.status !== "available" ? downloadError(entry) : ""), /* @__PURE__ */ React.createElement("dl", { className: "cs-facts" }, /* @__PURE__ */ React.createElement("div", { className: "cs-fact" }, /* @__PURE__ */ React.createElement("dt", null, "提供版本"), /* @__PURE__ */ React.createElement("dd", null, entry.revoked ? "不可用" : entry.version)), /* @__PURE__ */ React.createElement("div", { className: "cs-fact" }, /* @__PURE__ */ React.createElement("dt", null, "已安装版本"), /* @__PURE__ */ React.createElement("dd", null, entry.installedVersion || "未安装")), entry.stagedVersion ? /* @__PURE__ */ React.createElement("div", { className: "cs-fact" }, /* @__PURE__ */ React.createElement("dt", null, "暂存版本"), /* @__PURE__ */ React.createElement("dd", null, entry.stagedVersion)) : null, /* @__PURE__ */ React.createElement("div", { className: "cs-fact" }, /* @__PURE__ */ React.createElement("dt", null, "下载量 \xB7 所有版本"), /* @__PURE__ */ React.createElement("dd", null, /* @__PURE__ */ React.createElement(DownloadCount, { entry }), /* @__PURE__ */ React.createElement("div", { className: "cs-footnote" }, metricFreshness(entry.downloads)))), /* @__PURE__ */ React.createElement("div", { className: "cs-fact" }, /* @__PURE__ */ React.createElement("dt", null, "GitHub 星标"), /* @__PURE__ */ React.createElement("dd", null, /* @__PURE__ */ React.createElement(StarCount, { entry }), /* @__PURE__ */ React.createElement("div", { className: "cs-footnote" }, metricFreshness(entry.stars)))), /* @__PURE__ */ React.createElement("div", { className: "cs-fact" }, /* @__PURE__ */ React.createElement("dt", null, "引擎兼容性"), /* @__PURE__ */ React.createElement("dd", null, entry.minEngineVersion || "未指定", entry.maxEngineVersion ? ` \u2013 ${entry.maxEngineVersion}` : entry.minEngineVersion ? "+" : ""))), entry.revoked ? /* @__PURE__ */ React.createElement("p", { className: "cs-notice error" }, "此包已不再由其来源提供。请确认您是否仍信任它。") : entry.stagedVersion ? /* @__PURE__ */ React.createElement("p", { className: "cs-notice warn" }, "版本 ", entry.stagedVersion, " 已暂存。请重启引擎以激活。") : !entry.compatible ? /* @__PURE__ */ React.createElement("p", { className: "cs-notice warn" }, "此引擎无兼容版本可用。") : /* @__PURE__ */ React.createElement("p", { className: "cs-notice" }, content ? "已导入的内容立即可用。无需重启。" : "安装后需要重启引擎。"), entry.modified ? /* @__PURE__ */ React.createElement("p", { className: "cs-notice warn" }, entry.driftTracked === false ? "使用旧跟踪格式时本地变更未知。" : "检测到本地编辑。", " 替换此内容前请先审查。您可以通过导入副本来保留您的更改。") : null, entry.deprecated ? /* @__PURE__ */ React.createElement("p", { className: "cs-notice warn" }, "发布者已废弃", entry.deprecationMessage ? `: ${entry.deprecationMessage}` : ".") : null, entry.newerSnapshot ? /* @__PURE__ */ React.createElement("p", { className: "cs-notice" }, "有更新的快照可用：", entry.newerSnapshot, "。作为副本导入以保留已安装的通道。") : null, actionable ? /* @__PURE__ */ React.createElement(
     "button",
     {
       className: "btn btn-primary cs-primary-action",
@@ -2618,16 +2618,16 @@ function DetailView({ entry, actions }) {
       onClick: () => channelCopy ? actions.requestCopy(entry) : update ? actions.requestUpdate(entry) : actions.requestInstall(entry)
     },
     label
-  ) : null, /* @__PURE__ */ React.createElement("p", { className: "cs-footnote" }, "Community published. A checksum verifies artifact integrity, not publisher identity."), /* @__PURE__ */ React.createElement("details", { className: "cs-package-info" }, /* @__PURE__ */ React.createElement("summary", null, "Package information"), /* @__PURE__ */ React.createElement("dl", { className: "cs-facts" }, /* @__PURE__ */ React.createElement("div", { className: "cs-fact" }, /* @__PURE__ */ React.createElement("dt", null, "License"), /* @__PURE__ */ React.createElement("dd", null, entry.license || "Unspecified")), /* @__PURE__ */ React.createElement("div", { className: "cs-fact" }, /* @__PURE__ */ React.createElement("dt", null, "Repository"), /* @__PURE__ */ React.createElement("dd", null, /* @__PURE__ */ React.createElement(ExternalLink, { href: entry.repoUrl || `https://github.com/${entry.repo}` }, entry.repo || "Repository"))), /* @__PURE__ */ React.createElement("div", { className: "cs-fact" }, /* @__PURE__ */ React.createElement("dt", null, "Source"), /* @__PURE__ */ React.createElement("dd", null, entry.source)), /* @__PURE__ */ React.createElement("div", { className: "cs-fact" }, /* @__PURE__ */ React.createElement("dt", null, "Artifact integrity"), /* @__PURE__ */ React.createElement("dd", null, entry.sha256 || entry.checksumUrl ? "SHA-256 on install" : "No published checksum")), entry.publishedAt ? /* @__PURE__ */ React.createElement("div", { className: "cs-fact" }, /* @__PURE__ */ React.createElement("dt", null, "Published"), /* @__PURE__ */ React.createElement("dd", null, new Date(entry.publishedAt).toLocaleDateString())) : null, !entry.offeredIsLatest && entry.latestTag ? /* @__PURE__ */ React.createElement("div", { className: "cs-fact" }, /* @__PURE__ */ React.createElement("dt", null, "Latest release"), /* @__PURE__ */ React.createElement("dd", null, entry.latestTag, " (offering the compatible version)")) : null)), /* @__PURE__ */ React.createElement("div", { className: "cs-detail-links" }, /* @__PURE__ */ React.createElement(ExternalLink, { href: entry.documentation }, "Documentation \u2197"), /* @__PURE__ */ React.createElement(ExternalLink, { href: entry.releaseUrl }, "Release notes \u2197")), !entry.revoked ? /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("button", { className: "btn cs-docs-toggle", "aria-expanded": docsOpen, onClick: () => setDocsOpen(!docsOpen) }, docsOpen ? "Hide publisher documentation" : "Read publisher documentation"), docsOpen ? /* @__PURE__ */ React.createElement(DocsPanel, { entry }) : null) : null, entry.installedVersion ? /* @__PURE__ */ React.createElement("div", { className: "cs-facts" }, content && entry.type !== "channel" && canRemove() ? /* @__PURE__ */ React.createElement("button", { className: "btn btn-danger", disabled: actions.busy, onClick: () => actions.requestRemove(entry) }, "Remove from engine\u2026") : /* @__PURE__ */ React.createElement("p", { className: "cs-footnote" }, entry.type === "channel" ? "Manage or delete this channel in Channels." : "Manage or uninstall this package in Extensions.")) : null);
+  ) : null, /* @__PURE__ */ React.createElement("p", { className: "cs-footnote" }, "社区发布。校验和验证构建产物完整性，不代表发布者身份。"), /* @__PURE__ */ React.createElement("details", { className: "cs-package-info" }, /* @__PURE__ */ React.createElement("summary", null, "包信息"), /* @__PURE__ */ React.createElement("dl", { className: "cs-facts" }, /* @__PURE__ */ React.createElement("div", { className: "cs-fact" }, /* @__PURE__ */ React.createElement("dt", null, "许可证"), /* @__PURE__ */ React.createElement("dd", null, entry.license || "未指定")), /* @__PURE__ */ React.createElement("div", { className: "cs-fact" }, /* @__PURE__ */ React.createElement("dt", null, "仓库"), /* @__PURE__ */ React.createElement("dd", null, /* @__PURE__ */ React.createElement(ExternalLink, { href: entry.repoUrl || `https://github.com/${entry.repo}` }, entry.repo || "仓库"))), /* @__PURE__ */ React.createElement("div", { className: "cs-fact" }, /* @__PURE__ */ React.createElement("dt", null, "来源"), /* @__PURE__ */ React.createElement("dd", null, entry.source)), /* @__PURE__ */ React.createElement("div", { className: "cs-fact" }, /* @__PURE__ */ React.createElement("dt", null, "构建产物完整性"), /* @__PURE__ */ React.createElement("dd", null, entry.sha256 || entry.checksumUrl ? "安装时 SHA-256 校验" : "未发布校验和")), entry.publishedAt ? /* @__PURE__ */ React.createElement("div", { className: "cs-fact" }, /* @__PURE__ */ React.createElement("dt", null, "发布时间"), /* @__PURE__ */ React.createElement("dd", null, new Date(entry.publishedAt).toLocaleDateString())) : null, !entry.offeredIsLatest && entry.latestTag ? /* @__PURE__ */ React.createElement("div", { className: "cs-fact" }, /* @__PURE__ */ React.createElement("dt", null, "最新发布"), /* @__PURE__ */ React.createElement("dd", null, entry.latestTag, " (提供兼容版本)")) : null)), /* @__PURE__ */ React.createElement("div", { className: "cs-detail-links" }, /* @__PURE__ */ React.createElement(ExternalLink, { href: entry.documentation }, "文档 \u2197"), /* @__PURE__ */ React.createElement(ExternalLink, { href: entry.releaseUrl }, "发布说明 \u2197")), !entry.revoked ? /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("button", { className: "btn cs-docs-toggle", "aria-expanded": docsOpen, onClick: () => setDocsOpen(!docsOpen) }, docsOpen ? "隐藏发布者文档" : "阅读发布者文档"), docsOpen ? /* @__PURE__ */ React.createElement(DocsPanel, { entry }) : null) : null, entry.installedVersion ? /* @__PURE__ */ React.createElement("div", { className: "cs-facts" }, content && entry.type !== "channel" && canRemove() ? /* @__PURE__ */ React.createElement("button", { className: "btn btn-danger", disabled: actions.busy, onClick: () => actions.requestRemove(entry) }, "从引擎移除\u2026") : /* @__PURE__ */ React.createElement("p", { className: "cs-footnote" }, entry.type === "channel" ? "在通道中管理或删除此通道。" : "在扩展中管理或卸载此包。")) : null);
 }
 function statusGroup(e) {
-  if (e.stagedVersion) return "Restart pending";
-  if (e.revoked) return "Needs attention";
-  if (e.updateAvailable) return "Updates available";
-  return e.installedVersion ? "Installed" : "Available";
+  if (e.stagedVersion) return "待重启";
+  if (e.revoked) return "需要关注";
+  if (e.updateAvailable) return "有可用更新";
+  return e.installedVersion ? "已安装" : "可用";
 }
-var STATUS_ORDER = ["Restart pending", "Needs attention", "Updates available", "Installed", "Available"];
-var SORT_COLUMNS = [["name", "Package"], ["type", "Type"], ["installedVersion", "Installed"], ["version", "Available"], ["downloads", "Downloads"], ["stars", "Stars"], ["status", "Status"]];
+var STATUS_ORDER = ["待重启", "需要关注", "有可用更新", "已安装", "可用"];
+var SORT_COLUMNS = [["name", "包"], ["type", "类型"], ["installedVersion", "已安装"], ["version", "可用"], ["downloads", "下载"], ["stars", "星标"], ["status", "状态"]];
 function comparePackages(a, b, key, direction) {
   const value = (entry) => {
     if (key === "downloads" || key === "stars") {
@@ -2664,19 +2664,19 @@ function CatalogView({ catalog, tab, selectedId, onSelect, actions }) {
   const types = [...new Set(visible.map((e) => e.type))].sort((a, b) => typeRank(a) - typeRank(b));
   const groups = /* @__PURE__ */ new Map();
   for (const entry of entries) {
-    const key = groupBy === "type" ? entry.type : groupBy === "status" ? statusGroup(entry) : "All packages";
+    const key = groupBy === "type" ? entry.type : groupBy === "status" ? statusGroup(entry) : "所有包";
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key).push(entry);
   }
   const orderedGroups = [...groups].sort(([a], [b]) => groupBy === "type" ? typeRank(a) - typeRank(b) : groupBy === "status" ? STATUS_ORDER.indexOf(a) - STATUS_ORDER.indexOf(b) : 0);
   const selected = visible.find((e) => e.id === selectedId);
-  return /* @__PURE__ */ React.createElement("div", { className: "cs-catalog" }, /* @__PURE__ */ React.createElement("div", { className: "cs-toolbar" }, /* @__PURE__ */ React.createElement("label", { className: "cs-search" }, /* @__PURE__ */ React.createElement("input", { className: "field", "aria-label": "Search packages", placeholder: "Search community packages\u2026", value: search, onChange: (e) => setSearch(e.target.value) })), /* @__PURE__ */ React.createElement("select", { className: "field", "aria-label": "Package type", value: typeFilter, onChange: (e) => setTypeFilter(e.target.value) }, /* @__PURE__ */ React.createElement("option", { value: "" }, "All package types"), types.map((type) => /* @__PURE__ */ React.createElement("option", { key: type, value: type }, TYPE_LABELS[type] || type))), /* @__PURE__ */ React.createElement("select", { className: "field", "aria-label": "Group packages", value: groupBy, onChange: (e) => {
+  return /* @__PURE__ */ React.createElement("div", { className: "cs-catalog" }, /* @__PURE__ */ React.createElement("div", { className: "cs-toolbar" }, /* @__PURE__ */ React.createElement("label", { className: "cs-search" }, /* @__PURE__ */ React.createElement("input", { className: "field", "aria-label": "搜索包", placeholder: "搜索社区包\u2026", value: search, onChange: (e) => setSearch(e.target.value) })), /* @__PURE__ */ React.createElement("select", { className: "field", "aria-label": "包类型", value: typeFilter, onChange: (e) => setTypeFilter(e.target.value) }, /* @__PURE__ */ React.createElement("option", { value: "" }, "所有包类型"), types.map((type) => /* @__PURE__ */ React.createElement("option", { key: type, value: type }, TYPE_LABELS[type] || type))), /* @__PURE__ */ React.createElement("select", { className: "field", "aria-label": "分组包", value: groupBy, onChange: (e) => {
     setGroupBy(e.target.value);
     setPref("groupBy", e.target.value);
-  } }, /* @__PURE__ */ React.createElement("option", { value: "status" }, "Group by status"), /* @__PURE__ */ React.createElement("option", { value: "type" }, "Group by type"), /* @__PURE__ */ React.createElement("option", { value: "none" }, "No grouping")), /* @__PURE__ */ React.createElement("select", { className: "field", "aria-label": "Sort packages", value: sortBy, onChange: (e) => changeSort(e.target.value) }, SORT_COLUMNS.map(([key, label]) => /* @__PURE__ */ React.createElement("option", { key, value: key }, "Sort by ", label.toLowerCase()))), /* @__PURE__ */ React.createElement("button", { className: "btn btn-sm", "aria-label": "Reverse sort direction", onClick: () => changeSort(sortBy, true) }, sortDirection === "asc" ? "Ascending \u2191" : "Descending \u2193"), /* @__PURE__ */ React.createElement("span", { className: "cs-result-count", role: "status" }, entries.length, " package", entries.length === 1 ? "" : "s")), /* @__PURE__ */ React.createElement("div", { className: "cs-workspace", tabIndex: 0, "aria-label": "Package list" }, /* @__PURE__ */ React.createElement("table", { className: "cs-table" }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", null, SORT_COLUMNS.map(([key, label]) => /* @__PURE__ */ React.createElement("th", { key, scope: "col", "aria-sort": sortBy === key ? sortDirection === "asc" ? "ascending" : "descending" : "none" }, /* @__PURE__ */ React.createElement("button", { className: "cs-sort-heading", onClick: () => changeSort(key, true), title: key === "downloads" ? DOWNLOAD_NOTE : `Sort by ${label.toLowerCase()}` }, label, /* @__PURE__ */ React.createElement("span", { "aria-hidden": "true" }, sortBy === key ? sortDirection === "asc" ? " \u2191" : " \u2193" : " \u2195")))))), orderedGroups.map(([key, items]) => /* @__PURE__ */ React.createElement("tbody", { key }, groupBy !== "none" ? /* @__PURE__ */ React.createElement("tr", { className: "cs-group" }, /* @__PURE__ */ React.createElement("th", { colSpan: 7, scope: "rowgroup" }, /* @__PURE__ */ React.createElement("button", { "aria-expanded": !collapsed[groupBy + key], onClick: () => setCollapsed((old) => ({ ...old, [groupBy + key]: !old[groupBy + key] })) }, /* @__PURE__ */ React.createElement("span", { "aria-hidden": "true" }, collapsed[groupBy + key] ? "\u25B8" : "\u25BE"), " ", groupBy === "type" ? TYPE_LABELS[key] || key : key, " ", /* @__PURE__ */ React.createElement("span", { className: "cs-count" }, items.length)))) : null, (groupBy === "none" || !collapsed[groupBy + key]) && items.map((entry) => /* @__PURE__ */ React.createElement("tr", { key: entry.id, className: "cs-package-row", onClick: () => onSelect(entry.id) }, /* @__PURE__ */ React.createElement("td", null, /* @__PURE__ */ React.createElement("button", { className: "cs-package", "aria-haspopup": "dialog", onClick: (e) => {
+  } }, /* @__PURE__ */ React.createElement("option", { value: "status" }, "按状态分组"), /* @__PURE__ */ React.createElement("option", { value: "type" }, "按类型分组"), /* @__PURE__ */ React.createElement("option", { value: "none" }, "不分组")), /* @__PURE__ */ React.createElement("select", { className: "field", "aria-label": "排序包", value: sortBy, onChange: (e) => changeSort(e.target.value) }, SORT_COLUMNS.map(([key, label]) => /* @__PURE__ */ React.createElement("option", { key, value: key }, "按", label.toLowerCase()))), /* @__PURE__ */ React.createElement("button", { className: "btn btn-sm", "aria-label": "反转排序方向", onClick: () => changeSort(sortBy, true) }, sortDirection === "asc" ? "升序 \u2191" : "降序 \u2193"), /* @__PURE__ */ React.createElement("span", { className: "cs-result-count", role: "status" }, entries.length, " 个包", entries.length === 1 ? "" : "s")), /* @__PURE__ */ React.createElement("div", { className: "cs-workspace", tabIndex: 0, "aria-label": "包列表" }, /* @__PURE__ */ React.createElement("table", { className: "cs-table" }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", null, SORT_COLUMNS.map(([key, label]) => /* @__PURE__ */ React.createElement("th", { key, scope: "col", "aria-sort": sortBy === key ? sortDirection === "asc" ? "ascending" : "descending" : "none" }, /* @__PURE__ */ React.createElement("button", { className: "cs-sort-heading", onClick: () => changeSort(key, true), title: key === "downloads" ? DOWNLOAD_NOTE : `按${label.toLowerCase()}排序` }, label, /* @__PURE__ */ React.createElement("span", { "aria-hidden": "true" }, sortBy === key ? sortDirection === "asc" ? " \u2191" : " \u2193" : " \u2195")))))), orderedGroups.map(([key, items]) => /* @__PURE__ */ React.createElement("tbody", { key }, groupBy !== "none" ? /* @__PURE__ */ React.createElement("tr", { className: "cs-group" }, /* @__PURE__ */ React.createElement("th", { colSpan: 7, scope: "rowgroup" }, /* @__PURE__ */ React.createElement("button", { "aria-expanded": !collapsed[groupBy + key], onClick: () => setCollapsed((old) => ({ ...old, [groupBy + key]: !old[groupBy + key] })) }, /* @__PURE__ */ React.createElement("span", { "aria-hidden": "true" }, collapsed[groupBy + key] ? "\u25B8" : "\u25BE"), " ", groupBy === "type" ? TYPE_LABELS[key] || key : key, " ", /* @__PURE__ */ React.createElement("span", { className: "cs-count" }, items.length)))) : null, (groupBy === "none" || !collapsed[groupBy + key]) && items.map((entry) => /* @__PURE__ */ React.createElement("tr", { key: entry.id, className: "cs-package-row", onClick: () => onSelect(entry.id) }, /* @__PURE__ */ React.createElement("td", null, /* @__PURE__ */ React.createElement("button", { className: "cs-package", "aria-haspopup": "dialog", onClick: (e) => {
     e.stopPropagation();
     onSelect(entry.id);
-  } }, /* @__PURE__ */ React.createElement(PackageIcon, { type: entry.type }), /* @__PURE__ */ React.createElement("span", null, /* @__PURE__ */ React.createElement("span", { className: "cs-name" }, entry.name), /* @__PURE__ */ React.createElement("span", { className: "cs-description" }, entry.description)))), /* @__PURE__ */ React.createElement("td", null, TYPE_LABELS[entry.type] || entry.type), /* @__PURE__ */ React.createElement("td", null, entry.installedVersion || "\u2014"), /* @__PURE__ */ React.createElement("td", null, entry.revoked ? "\u2014" : entry.version), /* @__PURE__ */ React.createElement("td", null, /* @__PURE__ */ React.createElement(DownloadCount, { entry })), /* @__PURE__ */ React.createElement("td", null, /* @__PURE__ */ React.createElement(StarCount, { entry })), /* @__PURE__ */ React.createElement("td", null, /* @__PURE__ */ React.createElement(PackageStatus, { entry }))))))), !entries.length ? /* @__PURE__ */ React.createElement("div", { className: "cs-empty" }, search || typeFilter ? "No matches. Try another search or package type." : tab === "updates" ? "No updates available in the current catalog." : tab === "installed" ? "No store packages are installed on this engine." : "No packages available. Check your sources and sync status in Settings.") : null), selected ? /* @__PURE__ */ React.createElement(ConfirmOverlay, { documentation: true, closeLabel: "Close package details", inactive: !!actions.overlay, title: selected.name, onCancel: () => onSelect(null) }, /* @__PURE__ */ React.createElement(DetailView, { key: selected.id, entry: selected, actions })) : null);
+  } }, /* @__PURE__ */ React.createElement(PackageIcon, { type: entry.type }), /* @__PURE__ */ React.createElement("span", null, /* @__PURE__ */ React.createElement("span", { className: "cs-name" }, entry.name), /* @__PURE__ */ React.createElement("span", { className: "cs-description" }, entry.description)))), /* @__PURE__ */ React.createElement("td", null, TYPE_LABELS[entry.type] || entry.type), /* @__PURE__ */ React.createElement("td", null, entry.installedVersion || "\u2014"), /* @__PURE__ */ React.createElement("td", null, entry.revoked ? "\u2014" : entry.version), /* @__PURE__ */ React.createElement("td", null, /* @__PURE__ */ React.createElement(DownloadCount, { entry })), /* @__PURE__ */ React.createElement("td", null, /* @__PURE__ */ React.createElement(StarCount, { entry })), /* @__PURE__ */ React.createElement("td", null, /* @__PURE__ */ React.createElement(PackageStatus, { entry }))))))), !entries.length ? /* @__PURE__ */ React.createElement("div", { className: "cs-empty" }, search || typeFilter ? "无匹配结果。请尝试其他搜索或包类型。" : tab === "updates" ? "当前目录中无可用更新。" : tab === "installed" ? "此引擎未安装商店包。" : "无可用包。请在设置中检查来源和同步状态。") : null), selected ? /* @__PURE__ */ React.createElement(ConfirmOverlay, { documentation: true, closeLabel: "关闭包详情", inactive: !!actions.overlay, title: selected.name, onCancel: () => onSelect(null) }, /* @__PURE__ */ React.createElement(DetailView, { key: selected.id, entry: selected, actions })) : null);
 }
 function SettingsView({ catalog, onSaved }) {
   const [settings, setSettings] = React.useState(null);
@@ -2696,7 +2696,7 @@ function SettingsView({ catalog, onSaved }) {
   React.useEffect(() => {
     load();
   }, []);
-  if (!settings) return /* @__PURE__ */ React.createElement("div", { className: "text-text-dim" }, "Loading settings\u2026");
+  if (!settings) return /* @__PURE__ */ React.createElement("div", { className: "text-text-dim" }, "正在加载设置\u2026");
   const save = async () => {
     setSaving(true);
     try {
@@ -2709,7 +2709,7 @@ function SettingsView({ catalog, onSaved }) {
       const updated = await apiPut(`${BASE}/settings`, body);
       setSettings(updated);
       setToken(null);
-      toast("Settings saved.", "success");
+      toast("设置已保存。", "success");
       onSaved();
     } catch (e) {
       toast(errText(e), "error");
@@ -2725,14 +2725,14 @@ function SettingsView({ catalog, onSaved }) {
     setNewValue("");
   };
   const describeSource = (s) => s.kind === "catalog" ? `catalog: ${s.url}` : s.kind === "org" ? `org: ${s.org} (topic: ${s.topic})` : `repo: ${s.repo}`;
-  return /* @__PURE__ */ React.createElement("div", { className: "flex flex-col gap-3", style: { maxWidth: 760 } }, /* @__PURE__ */ React.createElement("div", { className: "panel" }, /* @__PURE__ */ React.createElement("div", { className: "panel-header" }, "Sources"), /* @__PURE__ */ React.createElement("div", { className: "panel-body" }, /* @__PURE__ */ React.createElement("div", { className: "hint mb-2" }, "Bundled sources ship with the store and update with store releases. Custom sources are additive and stored on this engine."), /* @__PURE__ */ React.createElement("table", { className: "dt" }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", null, /* @__PURE__ */ React.createElement("th", null, "Source"), /* @__PURE__ */ React.createElement("th", null, "Origin"), /* @__PURE__ */ React.createElement("th", null))), /* @__PURE__ */ React.createElement("tbody", null, settings.bundledSources.map((s, i) => /* @__PURE__ */ React.createElement("tr", { key: `b${i}` }, /* @__PURE__ */ React.createElement("td", { className: "mono" }, describeSource(s)), /* @__PURE__ */ React.createElement("td", { className: "text-text-dim" }, "bundled"), /* @__PURE__ */ React.createElement("td", null))), settings.customSources.map((s, i) => /* @__PURE__ */ React.createElement("tr", { key: `c${i}` }, /* @__PURE__ */ React.createElement("td", { className: "mono" }, describeSource(s)), /* @__PURE__ */ React.createElement("td", { className: "text-text-dim" }, "custom"), /* @__PURE__ */ React.createElement("td", null, /* @__PURE__ */ React.createElement("button", { className: "btn", onClick: () => setSettings({ ...settings, customSources: settings.customSources.filter((_, j) => j !== i) }) }, "Remove")))))), /* @__PURE__ */ React.createElement("div", { className: "flex gap-2 items-center mt-3" }, /* @__PURE__ */ React.createElement("select", { className: "field", style: { maxWidth: 110 }, value: newKind, onChange: (e) => setNewKind(e.target.value) }, /* @__PURE__ */ React.createElement("option", { value: "repo" }, "repo"), /* @__PURE__ */ React.createElement("option", { value: "org" }, "org"), /* @__PURE__ */ React.createElement("option", { value: "catalog" }, "catalog")), /* @__PURE__ */ React.createElement(
+  return /* @__PURE__ */ React.createElement("div", { className: "flex flex-col gap-3", style: { maxWidth: 760 } }, /* @__PURE__ */ React.createElement("div", { className: "panel" }, /* @__PURE__ */ React.createElement("div", { className: "panel-header" }, "数据来源"), /* @__PURE__ */ React.createElement("div", { className: "panel-body" }, /* @__PURE__ */ React.createElement("div", { className: "hint mb-2" }, "内置来源随商店发布并随商店更新。自定义来源为额外添加并存储在此引擎上。"), /* @__PURE__ */ React.createElement("table", { className: "dt" }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", null, /* @__PURE__ */ React.createElement("th", null, "来源"), /* @__PURE__ */ React.createElement("th", null, "来源类型"), /* @__PURE__ */ React.createElement("th", null))), /* @__PURE__ */ React.createElement("tbody", null, settings.bundledSources.map((s, i) => /* @__PURE__ */ React.createElement("tr", { key: `b${i}` }, /* @__PURE__ */ React.createElement("td", { className: "mono" }, describeSource(s)), /* @__PURE__ */ React.createElement("td", { className: "text-text-dim" }, "内置"), /* @__PURE__ */ React.createElement("td", null))), settings.customSources.map((s, i) => /* @__PURE__ */ React.createElement("tr", { key: `c${i}` }, /* @__PURE__ */ React.createElement("td", { className: "mono" }, describeSource(s)), /* @__PURE__ */ React.createElement("td", { className: "text-text-dim" }, "自定义"), /* @__PURE__ */ React.createElement("td", null, /* @__PURE__ */ React.createElement("button", { className: "btn", onClick: () => setSettings({ ...settings, customSources: settings.customSources.filter((_, j) => j !== i) }) }, "移除")))))), /* @__PURE__ */ React.createElement("div", { className: "flex gap-2 items-center mt-3" }, /* @__PURE__ */ React.createElement("select", { className: "field", style: { maxWidth: 110 }, value: newKind, onChange: (e) => setNewKind(e.target.value) }, /* @__PURE__ */ React.createElement("option", { value: "repo" }, "repo"), /* @__PURE__ */ React.createElement("option", { value: "org" }, "org"), /* @__PURE__ */ React.createElement("option", { value: "catalog" }, "catalog")), /* @__PURE__ */ React.createElement(
     "input",
     {
       className: "field",
       style: { maxWidth: newKind === "catalog" ? 380 : 260 },
       value: newValue,
       onChange: (e) => setNewValue(e.target.value),
-      placeholder: newKind === "catalog" ? "https://\u2026/index.json" : newKind === "org" ? "organization or user login" : "owner/repository"
+      placeholder: newKind === "catalog" ? "https://\u2026/index.json" : newKind === "org" ? "组织或用户登录名" : "所有者/仓库"
     }
   ), newKind === "org" ? /* @__PURE__ */ React.createElement(
     "input",
@@ -2741,30 +2741,30 @@ function SettingsView({ catalog, onSaved }) {
       style: { maxWidth: 160 },
       value: newTopic,
       onChange: (e) => setNewTopic(e.target.value),
-      placeholder: "topic filter"
+      placeholder: "主题过滤器"
     }
-  ) : null, /* @__PURE__ */ React.createElement("button", { className: "btn", onClick: addSource }, "Add source")))), /* @__PURE__ */ React.createElement("div", { className: "panel" }, /* @__PURE__ */ React.createElement("div", { className: "panel-header" }, "Blocklist"), /* @__PURE__ */ React.createElement("div", { className: "panel-body" }, /* @__PURE__ */ React.createElement("div", { className: "hint mb-2" }, "Blocked repositories never appear in the catalog. The bundled blocklist cannot be removed here."), settings.bundledBlocklist.map((b, i) => /* @__PURE__ */ React.createElement("div", { key: `bb${i}`, className: "flex gap-2 items-center" }, /* @__PURE__ */ React.createElement("span", { className: "mono" }, b), /* @__PURE__ */ React.createElement("span", { className: "text-text-dim" }, "(bundled)"))), settings.localBlocklist.map((b, i) => /* @__PURE__ */ React.createElement("div", { key: `lb${i}`, className: "flex gap-2 items-center" }, /* @__PURE__ */ React.createElement("span", { className: "mono" }, b), /* @__PURE__ */ React.createElement("button", { className: "btn", onClick: () => setSettings({ ...settings, localBlocklist: settings.localBlocklist.filter((_, j) => j !== i) }) }, "Remove"))), /* @__PURE__ */ React.createElement("div", { className: "flex gap-2 items-center mt-2" }, /* @__PURE__ */ React.createElement("input", { className: "field", style: { maxWidth: 260 }, value: newBlock, onChange: (e) => setNewBlock(e.target.value), placeholder: "owner/repository" }), /* @__PURE__ */ React.createElement("button", { className: "btn", onClick: () => {
+  ) : null, /* @__PURE__ */ React.createElement("button", { className: "btn", onClick: addSource }, "添加来源")))), /* @__PURE__ */ React.createElement("div", { className: "panel" }, /* @__PURE__ */ React.createElement("div", { className: "panel-header" }, "屏蔽列表"), /* @__PURE__ */ React.createElement("div", { className: "panel-body" }, /* @__PURE__ */ React.createElement("div", { className: "hint mb-2" }, "被屏蔽的仓库不会出现在目录中。内置屏蔽列表无法在此处移除。"), settings.bundledBlocklist.map((b, i) => /* @__PURE__ */ React.createElement("div", { key: `bb${i}`, className: "flex gap-2 items-center" }, /* @__PURE__ */ React.createElement("span", { className: "mono" }, b), /* @__PURE__ */ React.createElement("span", { className: "text-text-dim" }, "(内置)"))), settings.localBlocklist.map((b, i) => /* @__PURE__ */ React.createElement("div", { key: `lb${i}`, className: "flex gap-2 items-center" }, /* @__PURE__ */ React.createElement("span", { className: "mono" }, b), /* @__PURE__ */ React.createElement("button", { className: "btn", onClick: () => setSettings({ ...settings, localBlocklist: settings.localBlocklist.filter((_, j) => j !== i) }) }, "移除"))), /* @__PURE__ */ React.createElement("div", { className: "flex gap-2 items-center mt-2" }, /* @__PURE__ */ React.createElement("input", { className: "field", style: { maxWidth: 260 }, value: newBlock, onChange: (e) => setNewBlock(e.target.value), placeholder: "所有者/仓库" }), /* @__PURE__ */ React.createElement("button", { className: "btn", onClick: () => {
     const value = newBlock.trim().toLowerCase();
     if (value) setSettings({ ...settings, localBlocklist: [...settings.localBlocklist, value] });
     setNewBlock("");
-  } }, "Block")))), /* @__PURE__ */ React.createElement("div", { className: "panel" }, /* @__PURE__ */ React.createElement("div", { className: "panel-header" }, "GitHub access"), /* @__PURE__ */ React.createElement("div", { className: "panel-body flex flex-col gap-2" }, /* @__PURE__ */ React.createElement("label", { className: "flex gap-2 items-center" }, /* @__PURE__ */ React.createElement(
+  } }, "屏蔽")))), /* @__PURE__ */ React.createElement("div", { className: "panel" }, /* @__PURE__ */ React.createElement("div", { className: "panel-header" }, "GitHub 访问"), /* @__PURE__ */ React.createElement("div", { className: "panel-body flex flex-col gap-2" }, /* @__PURE__ */ React.createElement("label", { className: "flex gap-2 items-center" }, /* @__PURE__ */ React.createElement(
     "input",
     {
       type: "checkbox",
       checked: settings.betaChannel,
       onChange: (e) => setSettings({ ...settings, betaChannel: e.target.checked })
     }
-  ), "Include pre-releases (beta channel)"), /* @__PURE__ */ React.createElement("div", { className: "flex gap-2 items-center" }, /* @__PURE__ */ React.createElement(
+  ), "包含预发布版本（测试通道）"), /* @__PURE__ */ React.createElement("div", { className: "flex gap-2 items-center" }, /* @__PURE__ */ React.createElement(
     "input",
     {
       className: "field",
       type: "password",
       style: { maxWidth: 340 },
-      placeholder: settings.tokenSet ? "Token configured (leave blank to keep, save empty to clear)" : "Personal access token (optional)",
+      placeholder: settings.tokenSet ? "令牌已配置（留空保持不变，保存空值则清除）" : "个人访问令牌（可选）",
       value: token === null ? "" : token,
       onChange: (e) => setToken(e.target.value)
     }
-  ), settings.tokenSet && token === null ? /* @__PURE__ */ React.createElement("span", { className: "tag" }, "set") : null), /* @__PURE__ */ React.createElement("div", { className: "hint" }, "A token raises the GitHub API rate limit and enables private sources. It is stored encrypted on the engine and never returned to the browser.", catalog && catalog.rateLimitRemaining ? ` Rate limit remaining: ${catalog.rateLimitRemaining}.` : ""))), /* @__PURE__ */ React.createElement("div", { className: "flex gap-2" }, /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary", onClick: save, disabled: saving }, saving ? "Saving\u2026" : "Save settings")));
+  ), settings.tokenSet && token === null ? /* @__PURE__ */ React.createElement("span", { className: "tag" }, "已设置") : null), /* @__PURE__ */ React.createElement("div", { className: "hint" }, "令牌可提高 GitHub API 速率限制并启用私有来源。它在引擎上加密存储，从不返回给浏览器。", catalog && catalog.rateLimitRemaining ? ` 剩余速率：${catalog.rateLimitRemaining}.` : ""))), /* @__PURE__ */ React.createElement("div", { className: "flex gap-2" }, /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary", onClick: save, disabled: saving }, saving ? "保存中\u2026" : "保存设置")));
 }
 function CommunityStoreView() {
   const [tab, setTab] = React.useState("browse");
@@ -2807,22 +2807,22 @@ function CommunityStoreView() {
     installed: visible.filter((e) => e.installedVersion || e.stagedVersion).length,
     updates: visible.filter((e) => e.updateAvailable && !e.stagedVersion && !e.revoked).length
   };
-  return /* @__PURE__ */ React.createElement("div", { className: "view cs-store flex flex-col flex-1 min-h-0" }, /* @__PURE__ */ React.createElement("style", null, STORE_CSS), actions.overlay, /* @__PURE__ */ React.createElement("div", { className: "cs-header" }, /* @__PURE__ */ React.createElement("header", { className: "cs-heading" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("h1", null, "Community Store"), /* @__PURE__ */ React.createElement("p", null, "Extend your engine. Make it your own.")), /* @__PURE__ */ React.createElement("div", { className: "cs-sync" }, /* @__PURE__ */ React.createElement("button", { className: "btn", onClick: () => refresh(true), disabled: loading || actions.busy }, loading ? "Syncing\u2026" : "\u21BB Sync sources"), /* @__PURE__ */ React.createElement("div", null, catalog ? `Engine ${catalog.engineVersion} \xB7 Synced ${new Date(catalog.generatedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : "Connecting to engine"))), /* @__PURE__ */ React.createElement("nav", { className: "cs-tabs", "aria-label": "Community Store views" }, [["browse", "Discover"], ["installed", "Installed"], ["updates", "Updates"], ...canEditSettings() ? [["settings", "Settings"]] : []].map(([id, label]) => /* @__PURE__ */ React.createElement("button", { key: id, className: `cs-tab ${tab === id ? "active" : ""}`, "aria-current": tab === id ? "page" : void 0, onClick: () => setTab(id) }, label, id !== "settings" && data ? /* @__PURE__ */ React.createElement("span", { className: "cs-count" }, counts[id]) : null)))), /* @__PURE__ */ React.createElement("div", { className: "view-body cs-body" }, error ? /* @__PURE__ */ React.createElement("div", { className: "cs-notice error", role: "alert" }, "Could not load the catalog: ", error, " ", /* @__PURE__ */ React.createElement("button", { className: "btn btn-sm", onClick: () => refresh(true), disabled: loading }, "Retry")) : null, data?.errors?.length ? /* @__PURE__ */ React.createElement("div", { className: "cs-notice warn", role: "status" }, /* @__PURE__ */ React.createElement("strong", null, "Some sources could not sync."), " Results may be incomplete.", data.errors.map((e, i) => /* @__PURE__ */ React.createElement("div", { key: i }, e.source, ": ", e.message))) : null, completion ? /* @__PURE__ */ React.createElement("div", { className: "cs-notice", role: "status" }, completion.restartRequired ? `${completion.entry.name} ${completion.entry.version} is staged. Restart the engine to activate it.` : completion.mode === "remove" ? `${completion.entry.name} was removed.` : `${completion.entry.name} was imported${completion.mode === "copy" ? " as a copy" : ""}. It is available now.`, " ", /* @__PURE__ */ React.createElement("button", { className: "btn btn-sm", onClick: () => setCompletion(null), "aria-label": "Dismiss result" }, "Dismiss")) : null, tab === "settings" && canEditSettings() ? /* @__PURE__ */ React.createElement("div", { className: "cs-settings-scroll" }, /* @__PURE__ */ React.createElement(SettingsView, { catalog, onSaved: () => refresh(true) })) : data ? /* @__PURE__ */ React.createElement(CatalogView, { catalog: data, tab, selectedId, onSelect: setSelectedId, actions }) : loading ? /* @__PURE__ */ React.createElement("div", { className: "cs-empty", role: "status" }, "Loading community packages\u2026") : null));
+  return /* @__PURE__ */ React.createElement("div", { className: "view cs-store flex flex-col flex-1 min-h-0" }, /* @__PURE__ */ React.createElement("style", null, STORE_CSS), actions.overlay, /* @__PURE__ */ React.createElement("div", { className: "cs-header" }, /* @__PURE__ */ React.createElement("header", { className: "cs-heading" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("h1", null, "社区商店"), /* @__PURE__ */ React.createElement("p", null, "扩展您的引擎。打造您的专属引擎。")), /* @__PURE__ */ React.createElement("div", { className: "cs-sync" }, /* @__PURE__ */ React.createElement("button", { className: "btn", onClick: () => refresh(true), disabled: loading || actions.busy }, loading ? "同步中\u2026" : "\u21BB 同步来源"), /* @__PURE__ */ React.createElement("div", null, catalog ? `引擎 ${catalog.engineVersion} \xB7 同步于 ${new Date(catalog.generatedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : "正在连接引擎"))), /* @__PURE__ */ React.createElement("nav", { className: "cs-tabs", "aria-label": "社区商店视图" }, [["browse", "发现"], ["installed", "已安装"], ["updates", "更新"], ...canEditSettings() ? [["settings", "设置"]] : []].map(([id, label]) => /* @__PURE__ */ React.createElement("button", { key: id, className: `cs-tab ${tab === id ? "active" : ""}`, "aria-current": tab === id ? "page" : void 0, onClick: () => setTab(id) }, label, id !== "settings" && data ? /* @__PURE__ */ React.createElement("span", { className: "cs-count" }, counts[id]) : null)))), /* @__PURE__ */ React.createElement("div", { className: "view-body cs-body" }, error ? /* @__PURE__ */ React.createElement("div", { className: "cs-notice error", role: "alert" }, "无法加载目录：", error, " ", /* @__PURE__ */ React.createElement("button", { className: "btn btn-sm", onClick: () => refresh(true), disabled: loading }, "重试")) : null, data?.errors?.length ? /* @__PURE__ */ React.createElement("div", { className: "cs-notice warn", role: "status" }, /* @__PURE__ */ React.createElement("strong", null, "部分来源无法同步。"), " 结果可能不完整。", data.errors.map((e, i) => /* @__PURE__ */ React.createElement("div", { key: i }, e.source, ": ", e.message))) : null, completion ? /* @__PURE__ */ React.createElement("div", { className: "cs-notice", role: "status" }, completion.restartRequired ? `${completion.entry.name} ${completion.entry.version} 已暂存。请重启引擎以激活。` : completion.mode === "remove" ? `${completion.entry.name} was removed.` : `${completion.entry.name} was imported${completion.mode === "copy" ? " 为副本" : ""}. It is available now.`, " ", /* @__PURE__ */ React.createElement("button", { className: "btn btn-sm", onClick: () => setCompletion(null), "aria-label": "关闭结果" }, "关闭")) : null, tab === "settings" && canEditSettings() ? /* @__PURE__ */ React.createElement("div", { className: "cs-settings-scroll" }, /* @__PURE__ */ React.createElement(SettingsView, { catalog, onSaved: () => refresh(true) })) : data ? /* @__PURE__ */ React.createElement(CatalogView, { catalog: data, tab, selectedId, onSelect: setSelectedId, actions }) : loading ? /* @__PURE__ */ React.createElement("div", { className: "cs-empty", role: "status" }, "正在加载社区包\u2026") : null));
 }
 function register() {
   platform.registerNavItem({
     id: "community-store",
-    label: "Community Store",
+    label: "社区商店",
     icon: "store",
     path: "/community-store",
-    section: "Engine",
+    section: "引擎",
     order: 80,
     // The store's own task, declared in CommunityStoreServicePlugin's
-    // ExtensionPermissions → "View Community Store". RBAC merges it via
+    // ExtensionPermissions → "查看社区商店". RBAC merges it via
     // /task-permissions; without RBAC the nav is always visible.
     task: "doShowCommunityStore"
   });
-  platform.registerView("/community-store", platform.reactView(CommunityStoreView), { title: "Community Store" });
+  platform.registerView("/community-store", platform.reactView(CommunityStoreView), { title: "社区商店" });
 }
 export {
   register

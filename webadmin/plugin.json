@@ -1,9 +1,9 @@
 {
     "id": "community-store",
-    "name": "Community Store",
+    "name": "社区商店",
     "version": "0.8.1",
     "author": "Chris Gibson",
-    "description": "Browse, install, and update community plugins from GitHub releases, verified and installed by the engine under the manage-extensions permission.",
+    "description": "从 GitHub 发布版中浏览、安装和更新社区插件，由引擎在 manage-extensions 权限下校验并安装。",
     "enabled": true,
     "oie": { "apiMin": "4.6" },
     "client": { "entry": "web/plugin.js" }

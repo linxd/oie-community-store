@@ -1,8 +1,8 @@
 {
     "schemaVersion": 1,
     "id": "communitystore",
-    "name": "Community Store",
-    "description": "Discover, install, and update community plugins from GitHub releases — verified by sha256 and installed through the engine's own extension installer.",
+    "name": "社区商店",
+    "description": "从 GitHub 发布版中发现、安装和更新社区插件——通过 sha256 校验，并使用引擎自身的扩展安装器进行安装。",
     "type": "plugin",
     "ui": ["web", "swing"],
     "version": "0.8.1",

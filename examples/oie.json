@@ -1,8 +1,8 @@
 {
     "schemaVersion": 1,
     "id": "sqs-connector",
-    "name": "SQS Source Connector",
-    "description": "Consume messages from Amazon SQS queues as a channel source.",
+    "name": "SQS 源连接器",
+    "description": "从 Amazon SQS 队列消费消息作为通道源。",
     "type": "connector",
     "ui": ["web", "swing"],
     "version": "1.4.0",
