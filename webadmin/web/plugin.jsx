@@ -83,12 +83,12 @@ function errText(e) {
 /* ------------------------------------------------------------------ */
 
 const TYPE_LABELS = {
-    connector: 'Connector',
-    plugin: 'Plugin',
-    datatype: 'Data Type',
-    channel: 'Channel',
-    'code-template-library': 'Code Template Library',
-    'code-template': 'Code Template',
+    connector: '连接器',
+    plugin: '插件',
+    datatype: '数据类型',
+    channel: '通道',
+    'code-template-library': '代码模板库',
+    'code-template': '代码模板',
 };
 
 // Stable ordering for the type filter and the group-by-type sections.
@@ -128,7 +128,7 @@ function setPref(key, value) {
 /** Self-contained confirmation overlay (no dependency on host modal internals).
  *  An optional secondary action renders between Cancel and the primary button
  *  (used for the three-way modified-template choice). */
-function ConfirmOverlay({ title, children, confirmLabel, onConfirm, secondaryLabel, onSecondary, onCancel, busy, loading, error, documentation = false, inactive = false, closeLabel = "Close documentation" }) {
+function ConfirmOverlay({ title, children, confirmLabel, onConfirm, secondaryLabel, onSecondary, onCancel, busy, loading, error, documentation = false, inactive = false, closeLabel = "关闭文档" }) {
     const dialog = React.useRef(null);
     const titleId = React.useId();
     React.useEffect(() => {
@@ -147,16 +147,16 @@ function ConfirmOverlay({ title, children, confirmLabel, onConfirm, secondaryLab
     };
     return <div className="cs-overlay" style={inactive ? {display: 'none'} : undefined}>
         <div className={`panel cs-dialog ${documentation ? 'cs-documentation-dialog' : ''}`}  role="dialog" aria-modal="true" aria-labelledby={titleId} ref={dialog} tabIndex={-1} onKeyDown={onKeyDown}>
-            <div className="panel-header" id={titleId}>{title}{documentation ? <button className="btn btn-sm" onClick={onCancel} aria-label={closeLabel}>Close</button> : null}</div>
+            <div className="panel-header" id={titleId}>{title}{documentation ? <button className="btn btn-sm" onClick={onCancel} aria-label={closeLabel}>关闭</button> : null}</div>
             <div className="panel-body">
                 {children}
-                {loading ? <p role="status">Loading libraries…</p> : null}
+                {loading ? <p role="status">正在加载库…</p> : null}
                 {error ? <p role="alert" className="cs-notice error">{error}</p> : null}
                 {!documentation ? <div className="cs-dialog-actions">
-                    <button className="btn" onClick={() => onCancel()} disabled={busy}>Cancel</button>
+                    <button className="btn" onClick={() => onCancel()} disabled={busy}>取消</button>
                     {secondaryLabel ? <button className="btn btn-danger" onClick={() => onSecondary()} disabled={busy || loading}>{secondaryLabel}</button> : null}
                     <button className="btn btn-primary" onClick={() => onConfirm()} disabled={busy || loading}>
-                        {busy ? 'Working…' : confirmLabel}
+                        {busy ? '处理中…' : confirmLabel}
                     </button>
                 </div> : null}
             </div>
@@ -188,14 +188,14 @@ function useStoreActions(refresh, onComplete) {
         const request = ++pickerRequest.current;
         setLoadingLibraries(true);
         setLibMode('new');
-        setNewLib(entry.name || 'Community Store');
+        setNewLib(entry.name || '社区商店');
         setExistingLib('');
         setLibraries([]);
         try {
             const result = normalizeLibraries(await apiGet('/codeTemplateLibraries'));
             if (request === pickerRequest.current) setLibraries(result);
         } catch (e) {
-            if (request === pickerRequest.current) setActionError('Could not load existing libraries. You can create a new library, or cancel and retry. ' + errText(e));
+            if (request === pickerRequest.current) setActionError('无法加载现有库。您可以创建新库，或取消后重试。' + errText(e));
         } finally { if (request === pickerRequest.current) setLoadingLibraries(false); }
     };
 
@@ -237,7 +237,7 @@ function useStoreActions(refresh, onComplete) {
         try {
             if (mode === 'remove') {
                 await apiPost(`${BASE}/_removeContent`, { id: entry.id });
-                toast(`Removed ${entry.name} from this engine.`, 'success');
+                toast(`已从引擎中移除 ${entry.name}。`, 'success');
                 onComplete?.({ entry, mode, restartRequired: false });
                 setConfirm(null);
                 await refresh(false);
@@ -249,19 +249,19 @@ function useStoreActions(refresh, onComplete) {
                 if (mode === 'upgrade') { body.expectedContentHash = entry.expectedContentHash || ''; body.overwrite = overwrite; }
                 if (entry.type === 'code-template' && (mode === 'copy' || (mode === 'install' && !entry.installedVersion))) {
                     if (libMode === 'existing') {
-                        if (!existingLib) { toast('Choose a library to add this code template to.', 'warn'); setBusy(false); return; }
+                        if (!existingLib) { toast('请选择一个库以添加此代码模板。', 'warn'); setBusy(false); return; }
                         body.targetLibraryId = existingLib;
                     } else {
-                        body.newLibrary = (newLib || '').trim() || 'Community Store';
+                        body.newLibrary = (newLib || '').trim() || '社区商店';
                     }
                 }
                 const result = await apiPost(`${BASE}/_install`, body);
                 onComplete?.({ entry, mode, restartRequired: !!result.restartRequired });
-                toast(mode === 'upgrade' ? (entry.updateAvailable ? `Upgraded ${entry.name} to v${entry.version}.` : `Re-imported ${entry.name}.`)
-                    : mode === 'copy' ? `Imported ${entry.name} as a copy.`
+                toast(mode === 'upgrade' ? (entry.updateAvailable ? `已将 ${entry.name} 升级至 v${entry.version}。` : `已重新导入 ${entry.name}。`)
+                    : mode === 'copy' ? `已将 ${entry.name} 作为副本导入。`
                         : content
-                            ? `Imported ${entry.name}. It's available now.`
-                            : `Installed ${entry.name} ${entry.version}. Restart the engine to activate it.`, 'success');
+                            ? `已导入 ${entry.name}，现已可用。`
+                            : `已安装 ${entry.name} ${entry.version}。重启引擎以激活。`, 'success');
                 // Extensions need a restart (shell's staged → Reload UI banner); imported
                 // content takes effect immediately, so no restart prompt.
                 if (!content) {
@@ -284,23 +284,22 @@ function useStoreActions(refresh, onComplete) {
         const entry = confirm.entry;
         overlay = (
             <ConfirmOverlay
-                title={`Remove ${entry.name}?`}
-                confirmLabel="Remove"
+                title={`移除 ${entry.name}？`}
+                confirmLabel="移除"
                 busy={busy} loading={loadingLibraries} error={actionError}
                 onCancel={() => choose(null)}
                 onConfirm={() => execute('remove')}>
                 <div>
                     {entry.type === 'code-template-library' ? (
                         <p>
-                            Deletes the library <strong>{entry.name}</strong> and <strong>all code
-                            templates it currently contains</strong> — including any you added to
-                            it after installing.
+                            将删除库 <strong>{entry.name}</strong> 及其中的<strong>所有代码模板</strong>
+                            — 包括安装后您添加的模板。
                         </p>
                     ) : (
                         <p>
-                            Deletes the code template <strong>{entry.name}</strong> from this engine,
-                            including its library membership. The library itself is kept
-                            {entry.revoked ? '.' : ', and the package stays in Browse if you want to re-import it later.'}
+                            将从引擎中删除代码模板 <strong>{entry.name}</strong>，
+                            包括其库成员关系。库本身将被保留
+                            {entry.revoked ? '。' : '，并且如果以后需要重新导入，该包仍可在浏览中使用。'}
                         </p>
                     )}
                 </div>
@@ -312,13 +311,13 @@ function useStoreActions(refresh, onComplete) {
         // install (driftTracked=false) where the store cannot tell. Three-way:
         // overwrite / copy / cancel.
         const entry = confirm.entry;
-        const noun = entry.type === 'code-template-library' ? 'library' : 'template';
+        const noun = entry.type === 'code-template-library' ? '库' : '模板';
         const untracked = entry.driftTracked === false;
         overlay = (
             <ConfirmOverlay
-                title={`${entry.updateAvailable ? 'Update' : 'Re-import'} ${entry.name}?`}
-                confirmLabel="Install as new copy"
-                secondaryLabel="Overwrite"
+                title={`${entry.updateAvailable ? '更新' : '重新导入'} ${entry.name}？`}
+                confirmLabel="作为新副本安装"
+                secondaryLabel="覆盖"
                 busy={busy} loading={loadingLibraries} error={actionError}
                 onCancel={() => choose(null)}
                 onSecondary={() => execute('upgrade', true)}
@@ -326,15 +325,14 @@ function useStoreActions(refresh, onComplete) {
                 <div>
                     <p>
                         {untracked
-                            ? `This ${noun} was installed using an older change-tracking format — the store can't tell whether you've modified it.`
-                            : `You've modified this ${noun} since installing it.`}
+                            ? `此${noun}是使用旧版变更追踪格式安装的 — 商店无法判断您是否已对其进行了修改。`
+                            : `自安装以来，您已修改了此${noun}。`}
                     </p>
                     <p>
-                        <strong>Overwrite</strong> replaces {untracked ? 'whatever is there' : 'your changes'} with
-                        version {entry.version}.{' '}
-                        <strong>Install as new copy</strong> keeps {untracked ? "what's installed" : 'yours'} and
-                        imports version {entry.version} as a separate {noun}
-                        {entry.type === 'code-template' ? " (you'll choose a library for it)" : ''}.
+                        <strong>覆盖</strong>将{untracked ? '当前内容' : '您的修改'}替换为
+                        版本 {entry.version}。<strong>作为新副本安装</strong>将保留{untracked ? '已安装的内容' : '您的版本'}，
+                        并将版本 {entry.version} 作为单独的{noun}导入
+                        {entry.type === 'code-template' ? '（您需要为其选择一个库）' : ''}。
                     </p>
                 </div>
             </ConfirmOverlay>
@@ -344,17 +342,17 @@ function useStoreActions(refresh, onComplete) {
         const reimport = !entry.updateAvailable; // same version offered — re-import, not update
         overlay = (
             <ConfirmOverlay
-                title={reimport ? `Re-import ${entry.name}?` : `Update ${entry.name} to v${entry.version}?`}
-                confirmLabel={reimport ? 'Re-import' : `Update to v${entry.version}`}
+                title={reimport ? `重新导入 ${entry.name}？` : `将 ${entry.name} 更新至 v${entry.version}？`}
+                confirmLabel={reimport ? '重新导入' : `更新至 v${entry.version}`}
                 busy={busy} loading={loadingLibraries} error={actionError}
                 onCancel={() => choose(null)}
                 onConfirm={() => execute()}>
                 <div>
                     <p>
-                        Replaces the installed {TYPE_LABELS[entry.type] || entry.type} <strong>{entry.name}</strong> in
-                        place with version {entry.version} from <span className="mono">{entry.repo}</span> ({entry.tag}).
-                        {entry.type === 'code-template' ? ' Its library membership is kept, and it' : ' It'} takes
-                        effect immediately — no engine restart.
+                        将已安装的 {TYPE_LABELS[entry.type] || entry.type} <strong>{entry.name}</strong> 就地替换为
+                        来自 <span className="mono">{entry.repo}</span> ({entry.tag}) 的版本 {entry.version}。
+                        {entry.type === 'code-template' ? '其库成员关系将被保留，' : '它'}将
+                        立即生效 — 无需重启引擎。
                     </p>
                 </div>
             </ConfirmOverlay>
@@ -366,10 +364,10 @@ function useStoreActions(refresh, onComplete) {
         const wantsLibrary = entry.type === 'code-template' && (copy || !entry.installedVersion);
         overlay = (
             <ConfirmOverlay
-                title={copy ? `Install ${entry.name} as a copy?`
-                    : `${content ? (entry.updateAvailable ? 'Update' : 'Import') : 'Install'} ${entry.name}?`}
-                confirmLabel={copy ? 'Install as copy'
-                    : content ? (entry.updateAvailable ? `Update to ${entry.version}` : 'Import') : `Install ${entry.version}`}
+                title={copy ? `将 ${entry.name} 作为副本安装？`
+                    : `${content ? (entry.updateAvailable ? '更新' : '导入') : '安装'} ${entry.name}？`}
+                confirmLabel={copy ? '作为副本安装'
+                    : content ? (entry.updateAvailable ? `更新至 ${entry.version}` : '导入') : `安装 ${entry.version}`}
                 busy={busy} loading={loadingLibraries} error={actionError}
                 onCancel={() => choose(null)}
                 onConfirm={() => execute()}>
@@ -377,46 +375,45 @@ function useStoreActions(refresh, onComplete) {
                     <div>
                         {copy ? (
                             <p>
-                                Imports the {TYPE_LABELS[entry.type] || entry.type} <strong>{entry.name}</strong> version {entry.version} from{' '}
-                                <span className="mono">{entry.repo}</span> ({entry.tag}) as a new copy with a fresh id
-                                {entry.installedVersion ? ' — what you have installed is left untouched' : ''}.
-                                The copy is yours: the store does not track or update it.
+                                将导入 {TYPE_LABELS[entry.type] || entry.type} <strong>{entry.name}</strong> 版本 {entry.version}，来自{' '}
+                                <span className="mono">{entry.repo}</span> ({entry.tag})，作为具有新 id 的副本
+                                {entry.installedVersion ? ' — 已安装的内容保持不变' : ''}。
+                                该副本属于您：商店不会追踪或更新它。
                             </p>
                         ) : content ? (
                             <p>
-                                Imports the {TYPE_LABELS[entry.type] || entry.type} <strong>{entry.name}</strong> from{' '}
-                                <span className="mono">{entry.repo}</span> ({entry.tag}). It takes effect immediately — no engine restart.
+                                将导入 {TYPE_LABELS[entry.type] || entry.type} <strong>{entry.name}</strong>，来自{' '}
+                                <span className="mono">{entry.repo}</span> ({entry.tag})。导入后立即生效 — 无需重启引擎。
                             </p>
                         ) : (
                             <p>
-                                This installs <span className="mono">{entry.repo}</span> release{' '}
-                                <span className="mono">{entry.tag}</span> into the engine's extensions directory after sha256 verification.
+                                将在 sha256 验证后，将 <span className="mono">{entry.repo}</span> 发行版{' '}
+                                <span className="mono">{entry.tag}</span> 安装到引擎的扩展目录中。
                             </p>
                         )}
                         {wantsLibrary ? (
                             <div className="mt-3">
-                                <div className="text-text-dim mb-1">Add to library:</div>
+                                <div className="text-text-dim mb-1">添加到库：</div>
                                 <label className="flex items-center gap-2 mb-1" style={{ cursor: 'pointer' }}>
                                     <input type="radio" name="cs-lib" checked={libMode === 'new'} onChange={() => setLibMode('new')} />
-                                    Create new library:
-                                    <input className="field" style={{ maxWidth: 220 }} value={newLib} placeholder="Library name"
+                                    创建新库：
+                                    <input className="field" style={{ maxWidth: 220 }} value={newLib} placeholder="库名称"
                                         onFocus={() => setLibMode('new')} onChange={(e) => setNewLib(e.target.value)} />
                                 </label>
                                 <label className="flex items-center gap-2" style={{ cursor: libraries.length ? 'pointer' : 'default' }}>
                                     <input type="radio" name="cs-lib" checked={libMode === 'existing'} disabled={!libraries.length} onChange={() => setLibMode('existing')} />
-                                    Existing library:
+                                    现有库：
                                     <select className="field" style={{ maxWidth: 220 }} value={existingLib} disabled={!libraries.length}
                                         onChange={(e) => { setExistingLib(e.target.value); setLibMode('existing'); }}>
-                                        <option value="">{libraries.length ? 'Select a library…' : 'No libraries yet'}</option>
+                                        <option value="">{libraries.length ? '选择库…' : '暂无库'}</option>
                                         {libraries.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
                                     </select>
                                 </label>
                             </div>
                         ) : null}
                         <p className="hint mt-2">
-                            Community content is published by third parties and is not vetted by the Open
-                            Integration Engine project. Installing runs its code in the engine. Install only
-                            from publishers you trust.
+                            社区内容由第三方发布，未经开放集成引擎项目审核。安装将在引擎中执行其代码。
+                            请仅从您信任的发布者处安装。
                         </p>
                     </div>
                 )}
@@ -458,23 +455,22 @@ function DocsPanel({ entry }) {
     return (
         <div className="panel mt-3">
             <div className="panel-header flex items-center gap-2">
-                Documentation
+                文档
                 {docs && docs.found ? <span className="mono text-text-dim" style={{ fontSize: '0.85em' }}>{docs.path} @ {docs.tag}</span> : null}
             </div>
             <div className="panel-body">
                 <style>{DOCS_CSS}</style>
-                {error ? <span className="text-text-dim">Could not load documentation: {error}</span> : null}
-                {!error && !docs ? <span className="text-text-dim">Loading documentation…</span> : null}
+                {error ? <span className="text-text-dim">无法加载文档：{error}</span> : null}
+                {!error && !docs ? <span className="text-text-dim">正在加载文档…</span> : null}
                 {docs && !docs.found ? (
                     <span className="text-text-dim">
-                        This publisher provides no store documentation. Publishers can add a
-                        store.md (or README.md) to their repository; it renders here, pinned to the
-                        release tag.
+                        此发布者未提供商店文档。发布者可以在其仓库中添加
+                        store.md（或 README.md）文件，它将在此处渲染，并关联到对应的发行版标签。
                     </span>
                 ) : null}
                 {html ? <div className="cs-docs" dangerouslySetInnerHTML={{ __html: html }} /> : null}
                 {docs && docs.truncated ? (
-                    <div className="hint mt-2">Documentation was truncated. The full file is available in the repository.</div>
+                    <div className="hint mt-2">文档已被截断。完整文件可在仓库中查看。</div>
                 ) : null}
             </div>
         </div>
@@ -498,14 +494,14 @@ function PackageIcon({ type }) {
     return <span className="cs-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d={TYPE_ICONS[type] || TYPE_ICONS.plugin} /></svg></span>;
 }
 function PackageStatus({ entry }) {
-    if (entry.revoked) return <span className="cs-pill error">{entry.revokedReason === 'blocked' ? 'Blocked by source' : 'Removed from source'}</span>;
-    if (entry.stagedVersion) return <span className="cs-pill warn">Restart pending</span>;
-    if (entry.modified) return <span className="cs-pill warn">{entry.driftTracked === false ? 'Changes unknown' : 'Locally modified'}</span>;
-    if (entry.updateAvailable) return <span className="cs-pill update">Update available</span>;
-    if (!entry.compatible) return <span className="cs-pill warn">Incompatible</span>;
-    if (entry.deprecated) return <span className="cs-pill warn">Deprecated</span>;
-    if (entry.installedVersion) return <span className="cs-pill ok">Installed</span>;
-    return <span className="cs-pill">Available to {isContentType(entry.type) ? 'import' : 'install'}</span>;
+    if (entry.revoked) return <span className="cs-pill error">{entry.revokedReason === 'blocked' ? '已被源阻止' : '已从源中移除'}</span>;
+    if (entry.stagedVersion) return <span className="cs-pill warn">等待重启</span>;
+    if (entry.modified) return <span className="cs-pill warn">{entry.driftTracked === false ? '变更未知' : '已有本地修改'}</span>;
+    if (entry.updateAvailable) return <span className="cs-pill update">有可用更新</span>;
+    if (!entry.compatible) return <span className="cs-pill warn">不兼容</span>;
+    if (entry.deprecated) return <span className="cs-pill warn">已弃用</span>;
+    if (entry.installedVersion) return <span className="cs-pill ok">已安装</span>;
+    return <span className="cs-pill">{isContentType(entry.type) ? '可导入' : '可安装'}</span>;
 }
 function safeExternalUrl(value) {
     try { const url = new URL(value); return ['https:', 'http:'].includes(url.protocol) ? url.href : null; }
@@ -515,95 +511,95 @@ function ExternalLink({ href, children }) {
     const safe = safeExternalUrl(href);
     return safe ? <a href={safe} target="_blank" rel="noopener noreferrer">{children}</a> : null;
 }
-const DOWNLOAD_NOTE = 'Downloads of matching installer ZIPs across retained GitHub releases, including prereleases. Repeat and automated downloads count; this is not an installation or user count. Renamed asset families and deleted releases are excluded.';
+const DOWNLOAD_NOTE = '统计范围包括已保留的 GitHub 发行版（含预发布版）中匹配的安装包 ZIP 下载次数。重复和自动下载均计入统计；此数据并非安装量或用户数。已重命名的资源系列和已删除的发行版不在统计范围内。';
 const DOWNLOAD_ERRORS = {
-    unsupported_asset: 'Download statistics are not published for this installer URL or filename.',
-    package_not_found: 'This package is no longer in the catalog.',
-    revoked: 'This package has been removed from its source.',
-    no_matching_assets: 'No matching installer assets were found in GitHub releases.',
-    rate_limit_or_access_denied: 'GitHub rate limit reached or repository access denied. Check the GitHub token in Store Settings; the lookup retries after five minutes.',
-    repository_not_found: 'GitHub could not find or grant access to the repository.',
-    lookup_limit: 'The release history could not be completely counted within the lookup limits.',
-    github_unreachable: 'The engine could not reach GitHub. Check its network and TLS configuration.',
-    invalid_response: 'GitHub returned an unexpected statistics response.',
-    interrupted: 'The download lookup was interrupted.',
+    unsupported_asset: '此安装包 URL 或文件名未发布下载统计数据。',
+    package_not_found: '此包已不在目录中。',
+    revoked: '此包已从其源中移除。',
+    no_matching_assets: '在 GitHub 发行版中未找到匹配的安装包资源。',
+    rate_limit_or_access_denied: '已达到 GitHub 速率限制或仓库访问被拒绝。请检查商店设置中的 GitHub 令牌；系统将在五分钟后重试。',
+    repository_not_found: 'GitHub 无法找到或无法访问该仓库。',
+    lookup_limit: '在查询限制内无法完整统计发行版历史。',
+    github_unreachable: '引擎无法连接 GitHub。请检查其网络和 TLS 配置。',
+    invalid_response: 'GitHub 返回了意外的统计响应。',
+    interrupted: '下载查询被中断。',
 };
-function metricFreshness(stats) { return stats?.checkedAt ? `${stats.stale ? 'Refresh failed; last successful count' : 'Updated'}: ${new Date(stats.checkedAt).toLocaleString()}` : 'Statistics have not been published by this catalog yet.'; }
-function downloadError(entry) { return DOWNLOAD_ERRORS[entry.downloads?.reason] || 'This catalog has no download count for this package.'; }
+function metricFreshness(stats) { return stats?.checkedAt ? `${stats.stale ? '刷新失败；上次成功统计' : '更新于'}：${new Date(stats.checkedAt).toLocaleString()}` : '此目录尚未发布统计数据。'; }
+function downloadError(entry) { return DOWNLOAD_ERRORS[entry.downloads?.reason] || '此目录中没有该包的下载计数。'; }
 function DownloadCount({ entry }) {
     const stats = entry.downloads;
-    return <span title={stats?.status === 'available' ? `${DOWNLOAD_NOTE} ${metricFreshness(stats)}` : downloadError(entry)}>{stats?.status === 'available' && Number.isSafeInteger(stats.count) && stats.count >= 0 ? `${stats.count.toLocaleString()}${stats.stale ? ' (stale)' : ''}` : '—'}</span>;
+    return <span title={stats?.status === 'available' ? `${DOWNLOAD_NOTE} ${metricFreshness(stats)}` : downloadError(entry)}>{stats?.status === 'available' && Number.isSafeInteger(stats.count) && stats.count >= 0 ? `${stats.count.toLocaleString()}${stats.stale ? '（过时）' : ''}` : '—'}</span>;
 }
 function StarCount({ entry }) {
     const stats=entry.stars;
-    return <span title={`GitHub repository stars; packages sharing a repository share this count. ${metricFreshness(stats)}`}>{stats?.status === 'available' && Number.isSafeInteger(stats.count) && stats.count >= 0 ? `${stats.count.toLocaleString()}${stats.stale ? ' (stale)' : ''}` : '—'}</span>;
+    return <span title={`GitHub 仓库星标数；共享同一仓库的包共享此计数。${metricFreshness(stats)}`}>{stats?.status === 'available' && Number.isSafeInteger(stats.count) && stats.count >= 0 ? `${stats.count.toLocaleString()}${stats.stale ? '（过时）' : ''}` : '—'}</span>;
 }
 function DetailView({ entry, actions }) {
     const [docsOpen, setDocsOpen] = React.useState(true);
     React.useEffect(() => setDocsOpen(true), [entry?.id]);
-    if (!entry) return <aside className="cs-detail"><h2>Package details</h2><p className="cs-detail-description">Select a package to review its compatibility, source, and installation options.</p></aside>;
+    if (!entry) return <aside className="cs-detail"><h2>包详情</h2><p className="cs-detail-description">选择一个包以查看其兼容性、来源和安装选项。</p></aside>;
     const content = isContentType(entry.type);
     const channelCopy = entry.type === 'channel' && entry.installedVersion;
     const update = entry.updateAvailable || (content && entry.installedVersion && !channelCopy);
     const actionable = canInstall() && entry.installable && entry.compatible && !entry.revoked && !entry.stagedVersion
         && (content || !entry.installedVersion || entry.updateAvailable);
-    const label = channelCopy ? 'Import as copy' : update ? entry.updateAvailable ? `Review update to ${entry.version}` : 'Review re-import'
-        : content ? 'Review import' : 'Review installation';
-    return <aside className="cs-detail" aria-label="Selected package">
+    const label = channelCopy ? '作为副本导入' : update ? entry.updateAvailable ? `查看更新至 ${entry.version}` : '查看重新导入'
+        : content ? '查看导入' : '查看安装';
+    return <aside className="cs-detail" aria-label="已选包">
         <PackageIcon type={entry.type} />
         <h2>{entry.name}</h2>
-        <div className="cs-meta">{TYPE_LABELS[entry.type] || entry.type}{entry.authors?.length ? ` · by ${entry.authors.join(', ')}` : ''}</div>
-        <p className="cs-detail-description">{entry.description || 'No description provided.'}</p>
+        <div className="cs-meta">{TYPE_LABELS[entry.type] || entry.type}{entry.authors?.length ? ` · 作者：${entry.authors.join(', ')}` : ''}</div>
+        <p className="cs-detail-description">{entry.description || '未提供描述。'}</p>
         <PackageStatus entry={entry} />
         <p className="cs-footnote">{DOWNLOAD_NOTE} {entry.downloads?.status !== 'available' ? downloadError(entry) : ''}</p>
         <dl className="cs-facts">
-            <div className="cs-fact"><dt>Offered version</dt><dd>{entry.revoked ? 'Unavailable' : entry.version}</dd></div>
-            <div className="cs-fact"><dt>Installed version</dt><dd>{entry.installedVersion || 'Not installed'}</dd></div>
-            {entry.stagedVersion ? <div className="cs-fact"><dt>Staged version</dt><dd>{entry.stagedVersion}</dd></div> : null}
-            <div className="cs-fact"><dt>Downloads · all versions</dt><dd><DownloadCount entry={entry} /><div className="cs-footnote">{metricFreshness(entry.downloads)}</div></dd></div>
-            <div className="cs-fact"><dt>GitHub stars</dt><dd><StarCount entry={entry} /><div className="cs-footnote">{metricFreshness(entry.stars)}</div></dd></div>
-            <div className="cs-fact"><dt>Engine compatibility</dt><dd>{entry.minEngineVersion || 'Unspecified'}{entry.maxEngineVersion ? ` – ${entry.maxEngineVersion}` : entry.minEngineVersion ? '+' : ''}</dd></div>
+            <div className="cs-fact"><dt>提供版本</dt><dd>{entry.revoked ? '不可用' : entry.version}</dd></div>
+            <div className="cs-fact"><dt>已安装版本</dt><dd>{entry.installedVersion || '未安装'}</dd></div>
+            {entry.stagedVersion ? <div className="cs-fact"><dt>暂存版本</dt><dd>{entry.stagedVersion}</dd></div> : null}
+            <div className="cs-fact"><dt>下载量 · 所有版本</dt><dd><DownloadCount entry={entry} /><div className="cs-footnote">{metricFreshness(entry.downloads)}</div></dd></div>
+            <div className="cs-fact"><dt>GitHub 星标</dt><dd><StarCount entry={entry} /><div className="cs-footnote">{metricFreshness(entry.stars)}</div></dd></div>
+            <div className="cs-fact"><dt>引擎兼容性</dt><dd>{entry.minEngineVersion || '未指定'}{entry.maxEngineVersion ? ` – ${entry.maxEngineVersion}` : entry.minEngineVersion ? '+' : ''}</dd></div>
         </dl>
-        {entry.revoked ? <p className="cs-notice error">This package is no longer offered by its source. Review whether you still trust it.</p>
-            : entry.stagedVersion ? <p className="cs-notice warn">Version {entry.stagedVersion} is staged. Restart the engine to activate it.</p>
-            : !entry.compatible ? <p className="cs-notice warn">No compatible version is available for this engine.</p>
-            : <p className="cs-notice">{content ? 'Imported content is available immediately. No restart needed.' : 'Engine restart required after installation.'}</p>}
-        {entry.modified ? <p className="cs-notice warn">{entry.driftTracked === false ? 'Local changes are unknown with the previous tracking format.' : 'Local edits detected.'} Review before replacing this content. You can keep your changes by importing a copy.</p> : null}
-        {entry.deprecated ? <p className="cs-notice warn">Deprecated by the publisher{entry.deprecationMessage ? `: ${entry.deprecationMessage}` : '.'}</p> : null}
-        {entry.newerSnapshot ? <p className="cs-notice">Newer snapshot available: {entry.newerSnapshot}. Import as a copy to keep the installed channel.</p> : null}
+        {entry.revoked ? <p className="cs-notice error">此包已不再由其源提供。请评估您是否仍信任它。</p>
+            : entry.stagedVersion ? <p className="cs-notice warn">版本 {entry.stagedVersion} 已暂存。重启引擎以激活。</p>
+            : !entry.compatible ? <p className="cs-notice warn">此引擎没有可用的兼容版本。</p>
+            : <p className="cs-notice">{content ? '导入的内容立即可用，无需重启。' : '安装后需要重启引擎。'}</p>}
+        {entry.modified ? <p className="cs-notice warn">{entry.driftTracked === false ? '使用旧版追踪格式，本地变更未知。' : '检测到本地修改。'}替换此内容前请先确认。您可以通过导入副本来保留您的修改。</p> : null}
+        {entry.deprecated ? <p className="cs-notice warn">发布者已弃用此包{entry.deprecationMessage ? `：${entry.deprecationMessage}` : '。'}</p> : null}
+        {entry.newerSnapshot ? <p className="cs-notice">有更新的快照可用：{entry.newerSnapshot}。作为副本导入以保留已安装的通道。</p> : null}
         {actionable ? <button className="btn btn-primary cs-primary-action" disabled={actions.busy}
             onClick={() => channelCopy ? actions.requestCopy(entry) : update ? actions.requestUpdate(entry) : actions.requestInstall(entry)}>{label}</button> : null}
-        <p className="cs-footnote">Community published. A checksum verifies artifact integrity, not publisher identity.</p>
-        <details className="cs-package-info"><summary>Package information</summary><dl className="cs-facts">
-            <div className="cs-fact"><dt>License</dt><dd>{entry.license || 'Unspecified'}</dd></div>
-            <div className="cs-fact"><dt>Repository</dt><dd><ExternalLink href={entry.repoUrl || `https://github.com/${entry.repo}`}>{entry.repo || 'Repository'}</ExternalLink></dd></div>
-            <div className="cs-fact"><dt>Source</dt><dd>{entry.source}</dd></div>
-            <div className="cs-fact"><dt>Artifact integrity</dt><dd>{entry.sha256 || entry.checksumUrl ? 'SHA-256 on install' : 'No published checksum'}</dd></div>
-            {entry.publishedAt ? <div className="cs-fact"><dt>Published</dt><dd>{new Date(entry.publishedAt).toLocaleDateString()}</dd></div> : null}
-            {!entry.offeredIsLatest && entry.latestTag ? <div className="cs-fact"><dt>Latest release</dt><dd>{entry.latestTag} (offering the compatible version)</dd></div> : null}
+        <p className="cs-footnote">社区发布。校验和验证制品完整性，而非发布者身份。</p>
+        <details className="cs-package-info"><summary>包信息</summary><dl className="cs-facts">
+            <div className="cs-fact"><dt>许可证</dt><dd>{entry.license || '未指定'}</dd></div>
+            <div className="cs-fact"><dt>仓库</dt><dd><ExternalLink href={entry.repoUrl || `https://github.com/${entry.repo}`}>{entry.repo || '仓库'}</ExternalLink></dd></div>
+            <div className="cs-fact"><dt>来源</dt><dd>{entry.source}</dd></div>
+            <div className="cs-fact"><dt>制品完整性</dt><dd>{entry.sha256 || entry.checksumUrl ? '安装时进行 SHA-256 校验' : '未发布校验和'}</dd></div>
+            {entry.publishedAt ? <div className="cs-fact"><dt>发布时间</dt><dd>{new Date(entry.publishedAt).toLocaleDateString()}</dd></div> : null}
+            {!entry.offeredIsLatest && entry.latestTag ? <div className="cs-fact"><dt>最新发行版</dt><dd>{entry.latestTag}（提供兼容版本）</dd></div> : null}
         </dl></details>
         <div className="cs-detail-links">
-            <ExternalLink href={entry.documentation}>Documentation ↗</ExternalLink>
-            <ExternalLink href={entry.releaseUrl}>Release notes ↗</ExternalLink>
+            <ExternalLink href={entry.documentation}>文档 ↗</ExternalLink>
+            <ExternalLink href={entry.releaseUrl}>发行说明 ↗</ExternalLink>
         </div>
         {!entry.revoked ? <>
-            <button className="btn cs-docs-toggle" aria-expanded={docsOpen} onClick={() => setDocsOpen(!docsOpen)}>{docsOpen ? 'Hide publisher documentation' : 'Read publisher documentation'}</button>
+            <button className="btn cs-docs-toggle" aria-expanded={docsOpen} onClick={() => setDocsOpen(!docsOpen)}>{docsOpen ? '隐藏发布者文档' : '查看发布者文档'}</button>
             {docsOpen ? <DocsPanel entry={entry} /> : null}
         </> : null}
         {entry.installedVersion ? <div className="cs-facts">
-            {content && entry.type !== 'channel' && canRemove() ? <button className="btn btn-danger" disabled={actions.busy} onClick={() => actions.requestRemove(entry)}>Remove from engine…</button>
-                : <p className="cs-footnote">{entry.type === 'channel' ? 'Manage or delete this channel in Channels.' : 'Manage or uninstall this package in Extensions.'}</p>}
+            {content && entry.type !== 'channel' && canRemove() ? <button className="btn btn-danger" disabled={actions.busy} onClick={() => actions.requestRemove(entry)}>从引擎中移除…</button>
+                : <p className="cs-footnote">{entry.type === 'channel' ? '请在通道中管理或删除此通道。' : '请在扩展中管理或卸载此包。'}</p>}
         </div> : null}
     </aside>;
 }
 function statusGroup(e) {
-    if (e.stagedVersion) return 'Restart pending';
-    if (e.revoked) return 'Needs attention';
-    if (e.updateAvailable) return 'Updates available';
-    return e.installedVersion ? 'Installed' : 'Available';
+    if (e.stagedVersion) return '等待重启';
+    if (e.revoked) return '需要关注';
+    if (e.updateAvailable) return '有可用更新';
+    return e.installedVersion ? '已安装' : '可用';
 }
-const STATUS_ORDER = ['Restart pending', 'Needs attention', 'Updates available', 'Installed', 'Available'];
-const SORT_COLUMNS = [['name','Package'],['type','Type'],['installedVersion','Installed'],['version','Available'],['downloads','Downloads'],['stars','Stars'],['status','Status']];
+const STATUS_ORDER = ['等待重启', '需要关注', '有可用更新', '已安装', '可用'];
+const SORT_COLUMNS = [['name','包名'],['type','类型'],['installedVersion','已安装'],['version','可用'],['downloads','下载量'],['stars','星标'],['status','状态']];
 function comparePackages(a, b, key, direction) {
     const value = entry => {
         if (key === 'downloads' || key === 'stars') {
@@ -642,7 +638,7 @@ function CatalogView({ catalog, tab, selectedId, onSelect, actions }) {
     const types = [...new Set(visible.map(e => e.type))].sort((a,b) => typeRank(a) - typeRank(b));
     const groups = new Map();
     for (const entry of entries) {
-        const key = groupBy === 'type' ? entry.type : groupBy === 'status' ? statusGroup(entry) : 'All packages';
+        const key = groupBy === 'type' ? entry.type : groupBy === 'status' ? statusGroup(entry) : '所有包';
         if (!groups.has(key)) groups.set(key, []);
         groups.get(key).push(entry);
     }
@@ -650,15 +646,15 @@ function CatalogView({ catalog, tab, selectedId, onSelect, actions }) {
     const selected = visible.find(e => e.id === selectedId);
     return <div className="cs-catalog">
         <div className="cs-toolbar">
-            <label className="cs-search"><input className="field" aria-label="Search packages" placeholder="Search community packages…" value={search} onChange={e => setSearch(e.target.value)} /></label>
-            <select className="field" aria-label="Package type" value={typeFilter} onChange={e => setTypeFilter(e.target.value)}><option value="">All package types</option>{types.map(type => <option key={type} value={type}>{TYPE_LABELS[type] || type}</option>)}</select>
-            <select className="field" aria-label="Group packages" value={groupBy} onChange={e => {setGroupBy(e.target.value);setPref('groupBy',e.target.value);}}><option value="status">Group by status</option><option value="type">Group by type</option><option value="none">No grouping</option></select>
-            <select className="field" aria-label="Sort packages" value={sortBy} onChange={e => changeSort(e.target.value)}>{SORT_COLUMNS.map(([key,label]) => <option key={key} value={key}>Sort by {label.toLowerCase()}</option>)}</select>
-            <button className="btn btn-sm" aria-label="Reverse sort direction" onClick={() => changeSort(sortBy,true)}>{sortDirection === 'asc' ? 'Ascending ↑' : 'Descending ↓'}</button>
-            <span className="cs-result-count" role="status">{entries.length} package{entries.length === 1 ? '' : 's'}</span>
+            <label className="cs-search"><input className="field" aria-label="搜索包" placeholder="搜索社区包…" value={search} onChange={e => setSearch(e.target.value)} /></label>
+            <select className="field" aria-label="包类型" value={typeFilter} onChange={e => setTypeFilter(e.target.value)}><option value="">所有包类型</option>{types.map(type => <option key={type} value={type}>{TYPE_LABELS[type] || type}</option>)}</select>
+            <select className="field" aria-label="分组方式" value={groupBy} onChange={e => {setGroupBy(e.target.value);setPref('groupBy',e.target.value);}}><option value="status">按状态分组</option><option value="type">按类型分组</option><option value="none">不分组</option></select>
+            <select className="field" aria-label="排序方式" value={sortBy} onChange={e => changeSort(e.target.value)}>{SORT_COLUMNS.map(([key,label]) => <option key={key} value={key}>按{label}排序</option>)}</select>
+            <button className="btn btn-sm" aria-label="切换排序方向" onClick={() => changeSort(sortBy,true)}>{sortDirection === 'asc' ? '升序 ↑' : '降序 ↓'}</button>
+            <span className="cs-result-count" role="status">{entries.length} 个包</span>
         </div>
-        <div className="cs-workspace" tabIndex={0} aria-label="Package list">
-            <table className="cs-table"><thead><tr>{SORT_COLUMNS.map(([key,label]) => <th key={key} scope="col" aria-sort={sortBy === key ? sortDirection === 'asc' ? 'ascending' : 'descending' : 'none'}><button className="cs-sort-heading" onClick={() => changeSort(key,true)} title={key === 'downloads' ? DOWNLOAD_NOTE : `Sort by ${label.toLowerCase()}`}>{label}<span aria-hidden="true">{sortBy === key ? sortDirection === 'asc' ? ' ↑' : ' ↓' : ' ↕'}</span></button></th>)}</tr></thead>
+        <div className="cs-workspace" tabIndex={0} aria-label="包列表">
+            <table className="cs-table"><thead><tr>{SORT_COLUMNS.map(([key,label]) => <th key={key} scope="col" aria-sort={sortBy === key ? sortDirection === 'asc' ? 'ascending' : 'descending' : 'none'}><button className="cs-sort-heading" onClick={() => changeSort(key,true)} title={key === 'downloads' ? DOWNLOAD_NOTE : `按${label}排序`}>{label}<span aria-hidden="true">{sortBy === key ? sortDirection === 'asc' ? ' ↑' : ' ↓' : ' ↕'}</span></button></th>)}</tr></thead>
                 {orderedGroups.map(([key, items]) => <tbody key={key}>
                     {groupBy !== 'none' ? <tr className="cs-group"><th colSpan={7} scope="rowgroup"><button aria-expanded={!collapsed[groupBy+key]} onClick={() => setCollapsed(old => ({...old,[groupBy+key]:!old[groupBy+key]}))}><span aria-hidden="true">{collapsed[groupBy+key] ? '▸' : '▾'}</span> {groupBy === 'type' ? TYPE_LABELS[key] || key : key} <span className="cs-count">{items.length}</span></button></th></tr> : null}
                     {(groupBy === 'none' || !collapsed[groupBy+key]) && items.map(entry => <tr key={entry.id} className="cs-package-row" onClick={() => onSelect(entry.id)}>
@@ -667,9 +663,9 @@ function CatalogView({ catalog, tab, selectedId, onSelect, actions }) {
                     </tr>)}
                 </tbody>)}
             </table>
-            {!entries.length ? <div className="cs-empty">{search || typeFilter ? 'No matches. Try another search or package type.' : tab === 'updates' ? 'No updates available in the current catalog.' : tab === 'installed' ? 'No store packages are installed on this engine.' : 'No packages available. Check your sources and sync status in Settings.'}</div> : null}
+            {!entries.length ? <div className="cs-empty">{search || typeFilter ? '没有匹配结果。请尝试其他搜索条件或包类型。' : tab === 'updates' ? '当前目录中没有可用更新。' : tab === 'installed' ? '此引擎上未安装任何商店包。' : '没有可用包。请在设置中检查您的来源和同步状态。'}</div> : null}
         </div>
-        {selected ? <ConfirmOverlay documentation closeLabel="Close package details" inactive={!!actions.overlay} title={selected.name} onCancel={() => onSelect(null)}><DetailView key={selected.id} entry={selected} actions={actions} /></ConfirmOverlay> : null}
+        {selected ? <ConfirmOverlay documentation closeLabel="关闭包详情" inactive={!!actions.overlay} title={selected.name} onCancel={() => onSelect(null)}><DetailView key={selected.id} entry={selected} actions={actions} /></ConfirmOverlay> : null}
     </div>;
 }
 
@@ -692,7 +688,7 @@ function SettingsView({ catalog, onSaved }) {
     };
     React.useEffect(() => { load(); }, []);
 
-    if (!settings) return <div className="text-text-dim">Loading settings…</div>;
+    if (!settings) return <div className="text-text-dim">正在加载设置…</div>;
 
     const save = async () => {
         setSaving(true);
@@ -706,7 +702,7 @@ function SettingsView({ catalog, onSaved }) {
             const updated = await apiPut(`${BASE}/settings`, body);
             setSettings(updated);
             setToken(null);
-            toast('Settings saved.', 'success');
+            toast('设置已保存。', 'success');
             onSaved();
         } catch (e) {
             toast(errText(e), 'error');
@@ -727,106 +723,106 @@ function SettingsView({ catalog, onSaved }) {
         setNewValue('');
     };
 
-    const describeSource = (s) => s.kind === 'catalog' ? `catalog: ${s.url}`
-        : s.kind === 'org' ? `org: ${s.org} (topic: ${s.topic})` : `repo: ${s.repo}`;
+    const describeSource = (s) => s.kind === 'catalog' ? `目录：${s.url}`
+        : s.kind === 'org' ? `组织：${s.org}（主题：${s.topic}）` : `仓库：${s.repo}`;
 
     return (
         <div className="flex flex-col gap-3" style={{ maxWidth: 760 }}>
             <div className="panel">
-                <div className="panel-header">Sources</div>
+                <div className="panel-header">来源</div>
                 <div className="panel-body">
                     <div className="hint mb-2">
-                        Bundled sources ship with the store and update with store releases. Custom
-                        sources are additive and stored on this engine.
+                        内置来源随商店一起提供，并随商店发行版更新。自定义来源
+                        为附加来源，存储在此引擎上。
                     </div>
                     <table className="dt">
-                        <thead><tr><th>Source</th><th>Origin</th><th></th></tr></thead>
+                        <thead><tr><th>来源</th><th>类型</th><th></th></tr></thead>
                         <tbody>
                             {settings.bundledSources.map((s, i) => (
                                 <tr key={`b${i}`}>
                                     <td className="mono">{describeSource(s)}</td>
-                                    <td className="text-text-dim">bundled</td><td></td>
+                                    <td className="text-text-dim">内置</td><td></td>
                                 </tr>
                             ))}
                             {settings.customSources.map((s, i) => (
                                 <tr key={`c${i}`}>
                                     <td className="mono">{describeSource(s)}</td>
-                                    <td className="text-text-dim">custom</td>
+                                    <td className="text-text-dim">自定义</td>
                                     <td><button className="btn" onClick={() =>
                                         setSettings({ ...settings, customSources: settings.customSources.filter((_, j) => j !== i) })
-                                    }>Remove</button></td>
+                                    }>移除</button></td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
                     <div className="flex gap-2 items-center mt-3">
                         <select className="field" style={{ maxWidth: 110 }} value={newKind} onChange={(e) => setNewKind(e.target.value)}>
-                            <option value="repo">repo</option>
-                            <option value="org">org</option>
-                            <option value="catalog">catalog</option>
+                            <option value="repo">仓库</option>
+                            <option value="org">组织</option>
+                            <option value="catalog">目录</option>
                         </select>
                         <input className="field" style={{ maxWidth: newKind === 'catalog' ? 380 : 260 }} value={newValue} onChange={(e) => setNewValue(e.target.value)}
-                            placeholder={newKind === 'catalog' ? 'https://…/index.json' : newKind === 'org' ? 'organization or user login' : 'owner/repository'} />
+                            placeholder={newKind === 'catalog' ? 'https://…/index.json' : newKind === 'org' ? '组织或用户登录名' : '所有者/仓库'} />
                         {newKind === 'org' ? (
                             <input className="field" style={{ maxWidth: 160 }} value={newTopic} onChange={(e) => setNewTopic(e.target.value)}
-                                placeholder="topic filter" />
+                                placeholder="主题过滤" />
                         ) : null}
-                        <button className="btn" onClick={addSource}>Add source</button>
+                        <button className="btn" onClick={addSource}>添加来源</button>
                     </div>
                 </div>
             </div>
 
             <div className="panel">
-                <div className="panel-header">Blocklist</div>
+                <div className="panel-header">屏蔽列表</div>
                 <div className="panel-body">
-                    <div className="hint mb-2">Blocked repositories never appear in the catalog. The bundled blocklist cannot be removed here.</div>
+                    <div className="hint mb-2">被屏蔽的仓库不会出现在目录中。内置屏蔽列表无法在此处移除。</div>
                     {settings.bundledBlocklist.map((b, i) => (
-                        <div key={`bb${i}`} className="flex gap-2 items-center"><span className="mono">{b}</span><span className="text-text-dim">(bundled)</span></div>
+                        <div key={`bb${i}`} className="flex gap-2 items-center"><span className="mono">{b}</span><span className="text-text-dim">（内置）</span></div>
                     ))}
                     {settings.localBlocklist.map((b, i) => (
                         <div key={`lb${i}`} className="flex gap-2 items-center">
                             <span className="mono">{b}</span>
                             <button className="btn" onClick={() =>
                                 setSettings({ ...settings, localBlocklist: settings.localBlocklist.filter((_, j) => j !== i) })
-                            }>Remove</button>
+                            }>移除</button>
                         </div>
                     ))}
                     <div className="flex gap-2 items-center mt-2">
-                        <input className="field" style={{ maxWidth: 260 }} value={newBlock} onChange={(e) => setNewBlock(e.target.value)} placeholder="owner/repository" />
+                        <input className="field" style={{ maxWidth: 260 }} value={newBlock} onChange={(e) => setNewBlock(e.target.value)} placeholder="所有者/仓库" />
                         <button className="btn" onClick={() => {
                             const value = newBlock.trim().toLowerCase();
                             if (value) setSettings({ ...settings, localBlocklist: [...settings.localBlocklist, value] });
                             setNewBlock('');
-                        }}>Block</button>
+                        }}>屏蔽</button>
                     </div>
                 </div>
             </div>
 
             <div className="panel">
-                <div className="panel-header">GitHub access</div>
+                <div className="panel-header">GitHub 访问</div>
                 <div className="panel-body flex flex-col gap-2">
                     <label className="flex gap-2 items-center">
                         <input type="checkbox" checked={settings.betaChannel}
                             onChange={(e) => setSettings({ ...settings, betaChannel: e.target.checked })} />
-                        Include pre-releases (beta channel)
+                        包含预发布版（测试通道）
                     </label>
                     <div className="flex gap-2 items-center">
                         <input className="field" type="password" style={{ maxWidth: 340 }}
-                            placeholder={settings.tokenSet ? 'Token configured (leave blank to keep, save empty to clear)' : 'Personal access token (optional)'}
+                            placeholder={settings.tokenSet ? '令牌已配置（留空保持不变，保存空值则清除）' : '个人访问令牌（可选）'}
                             value={token === null ? '' : token}
                             onChange={(e) => setToken(e.target.value)} />
-                        {settings.tokenSet && token === null ? <span className="tag">set</span> : null}
+                        {settings.tokenSet && token === null ? <span className="tag">已设置</span> : null}
                     </div>
                     <div className="hint">
-                        A token raises the GitHub API rate limit and enables private sources. It is
-                        stored encrypted on the engine and never returned to the browser.
-                        {catalog && catalog.rateLimitRemaining ? ` Rate limit remaining: ${catalog.rateLimitRemaining}.` : ''}
+                        令牌可提高 GitHub API 速率限制并启用私有来源访问。令牌在引擎上
+                        加密存储，不会返回到浏览器。
+                        {catalog && catalog.rateLimitRemaining ? ` 剩余速率限制：${catalog.rateLimitRemaining}。` : ''}
                     </div>
                 </div>
             </div>
 
             <div className="flex gap-2">
-                <button className="btn btn-primary" onClick={save} disabled={saving}>{saving ? 'Saving…' : 'Save settings'}</button>
+                <button className="btn btn-primary" onClick={save} disabled={saving}>{saving ? '保存中…' : '保存设置'}</button>
             </div>
         </div>
     );
@@ -874,21 +870,21 @@ function CommunityStoreView() {
         {actions.overlay}
         <div className="cs-header">
             <header className="cs-heading">
-                <div><h1>Community Store</h1><p>Extend your engine. Make it your own.</p></div>
-                <div className="cs-sync"><button className="btn" onClick={() => refresh(true)} disabled={loading || actions.busy}>{loading ? 'Syncing…' : '↻ Sync sources'}</button><div>{catalog ? `Engine ${catalog.engineVersion} · Synced ${new Date(catalog.generatedAt).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}` : 'Connecting to engine'}</div></div>
+                <div><h1>社区商店</h1><p>扩展您的引擎，打造专属体验。</p></div>
+                <div className="cs-sync"><button className="btn" onClick={() => refresh(true)} disabled={loading || actions.busy}>{loading ? '同步中…' : '↻ 同步来源'}</button><div>{catalog ? `引擎 ${catalog.engineVersion} · 同步于 ${new Date(catalog.generatedAt).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}` : '正在连接引擎'}</div></div>
             </header>
-            <nav className="cs-tabs" aria-label="Community Store views">
-                {[['browse','Discover'],['installed','Installed'],['updates','Updates'], ...(canEditSettings() ? [['settings','Settings']] : [])].map(([id,label]) =>
+            <nav className="cs-tabs" aria-label="社区商店视图">
+                {[['browse','发现'],['installed','已安装'],['updates','更新'], ...(canEditSettings() ? [['settings','设置']] : [])].map(([id,label]) =>
                     <button key={id} className={`cs-tab ${tab === id ? 'active' : ''}`} aria-current={tab === id ? 'page' : undefined} onClick={() => setTab(id)}>{label}{id !== 'settings' && data ? <span className="cs-count">{counts[id]}</span> : null}</button>)}
             </nav>
         </div>
         <div className="view-body cs-body">
-            {error ? <div className="cs-notice error" role="alert">Could not load the catalog: {error} <button className="btn btn-sm" onClick={() => refresh(true)} disabled={loading}>Retry</button></div> : null}
-            {data?.errors?.length ? <div className="cs-notice warn" role="status"><strong>Some sources could not sync.</strong> Results may be incomplete.{data.errors.map((e,i) => <div key={i}>{e.source}: {e.message}</div>)}</div> : null}
-            {completion ? <div className="cs-notice" role="status">{completion.restartRequired ? `${completion.entry.name} ${completion.entry.version} is staged. Restart the engine to activate it.` : completion.mode === 'remove' ? `${completion.entry.name} was removed.` : `${completion.entry.name} was imported${completion.mode === 'copy' ? ' as a copy' : ''}. It is available now.`} <button className="btn btn-sm" onClick={() => setCompletion(null)} aria-label="Dismiss result">Dismiss</button></div> : null}
+            {error ? <div className="cs-notice error" role="alert">无法加载目录：{error} <button className="btn btn-sm" onClick={() => refresh(true)} disabled={loading}>重试</button></div> : null}
+            {data?.errors?.length ? <div className="cs-notice warn" role="status"><strong>部分来源无法同步。</strong>结果可能不完整。{data.errors.map((e,i) => <div key={i}>{e.source}: {e.message}</div>)}</div> : null}
+            {completion ? <div className="cs-notice" role="status">{completion.restartRequired ? `${completion.entry.name} ${completion.entry.version} 已暂存。重启引擎以激活。` : completion.mode === 'remove' ? `${completion.entry.name} 已移除。` : `${completion.entry.name} 已导入${completion.mode === 'copy' ? '为副本' : ''}，现已可用。`} <button className="btn btn-sm" onClick={() => setCompletion(null)} aria-label="关闭结果">关闭</button></div> : null}
             {tab === 'settings' && canEditSettings() ? <div className="cs-settings-scroll"><SettingsView catalog={catalog} onSaved={() => refresh(true)} /></div>
                 : data ? <CatalogView catalog={data} tab={tab} selectedId={selectedId} onSelect={setSelectedId} actions={actions} />
-                    : loading ? <div className="cs-empty" role="status">Loading community packages…</div> : null}
+                    : loading ? <div className="cs-empty" role="status">正在加载社区包…</div> : null}
         </div>
     </div>;
 }
@@ -900,15 +896,15 @@ function CommunityStoreView() {
 export function register() {
     platform.registerNavItem({
         id: 'community-store',
-        label: 'Community Store',
+        label: '社区商店',
         icon: 'store',
         path: '/community-store',
-        section: 'Engine',
+        section: '引擎',
         order: 80,
         // The store's own task, declared in CommunityStoreServicePlugin's
         // ExtensionPermissions → "View Community Store". RBAC merges it via
         // /task-permissions; without RBAC the nav is always visible.
         task: 'doShowCommunityStore',
     });
-    platform.registerView('/community-store', platform.reactView(CommunityStoreView), { title: 'Community Store' });
+    platform.registerView('/community-store', platform.reactView(CommunityStoreView), { title: '社区商店' });
 }
