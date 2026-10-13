@@ -74,7 +74,14 @@ final class ExtensionPreflight {
     private static void validateDescriptor(byte[] xml, String file, String id, String version) throws Exception {
         Element root = ContentHash.secureXmlFactory().newDocumentBuilder().parse(new ByteArrayInputStream(xml)).getDocumentElement();
         String kind = file.equals("plugin.xml") ? "pluginMetaData" : "connectorMetaData";
-        if (!kind.equals(root.getTagName()) || !id.equals(root.getAttribute("path"))) {
+        String path = root.getAttribute("path");
+        // For zh- prefixed package IDs, accept either the prefixed or original path
+        boolean pathMatches = id.equals(path);
+        if (!pathMatches && id.startsWith("zh-")) {
+            String originalId = id.substring(3);
+            pathMatches = originalId.equals(path);
+        }
+        if (!kind.equals(root.getTagName()) || !pathMatches) {
             throw new IOException("Descriptor identity does not match package '" + id + "': " + file);
         }
         var versions = root.getElementsByTagName("pluginVersion");
