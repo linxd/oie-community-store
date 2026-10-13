@@ -150,8 +150,12 @@ public class InstallService {
 
             ExtensionPreflight.validate(artifact, id, entry.path("version").asText(""));
 
+            // Repack ZIP: rename top-level directory to match plugin.xml path attribute
+            // This is needed because the engine expects directory name == plugin.xml path
+            byte[] repacked = repackWithOriginalDirectoryName(artifact, id);
+
             ExtensionController extensionController = ControllerFactory.getFactory().createExtensionController();
-            InstallationResult result = extensionController.extractExtension(new ByteArrayInputStream(artifact));
+            InstallationResult result = extensionController.extractExtension(new ByteArrayInputStream(repacked));
             if (result.getCause() != null) {
                 throw new IOException("Engine installer rejected the extension: " + result.getCause().getMessage(), result.getCause());
             }
@@ -482,5 +486,69 @@ public class InstallService {
         } catch (Exception e) {
             logger.warn("Community Store: failed to dispatch server event", e);
         }
+    }
+
+    /**
+     * Repacks the ZIP artifact, renaming the top-level directory to match the plugin.xml path attribute.
+     * This is needed because the engine expects the directory name to match the plugin.xml path,
+     * but our localized packages use zh- prefixed directory names to match the package ID.
+     */
+    private byte[] repackWithOriginalDirectoryName(byte[] artifact, String packageId) throws Exception {
+        // If not a zh- prefixed package, return as-is
+        if (!packageId.startsWith("zh-")) {
+            return artifact;
+        }
+
+        // Extract plugin.xml to get the path attribute
+        String originalPath = null;
+        try (java.util.zip.ZipInputStream zis = new java.util.zip.ZipInputStream(new java.io.ByteArrayInputStream(artifact))) {
+            java.util.zip.ZipEntry entry;
+            while ((entry = zis.getNextEntry()) != null) {
+                if (entry.getName().endsWith("/plugin.xml")) {
+                    byte[] xmlBytes = zis.readAllBytes();
+                    String xml = new String(xmlBytes, java.nio.charset.StandardCharsets.UTF_8);
+                    // Extract path attribute from <pluginMetaData path="...">
+                    int pathStart = xml.indexOf("path=\"");
+                    if (pathStart >= 0) {
+                        pathStart += 6;
+                        int pathEnd = xml.indexOf("\"", pathStart);
+                        if (pathEnd > pathStart) {
+                            originalPath = xml.substring(pathStart, pathEnd);
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+
+        // If we couldn't find the path or it matches the package ID, return as-is
+        if (originalPath == null || originalPath.equals(packageId)) {
+            return artifact;
+        }
+
+        // Repack the ZIP with renamed directory
+        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+        try (java.util.zip.ZipInputStream zis = new java.util.zip.ZipInputStream(new java.io.ByteArrayInputStream(artifact));
+             java.util.zip.ZipOutputStream zos = new java.util.zip.ZipOutputStream(baos)) {
+            java.util.zip.ZipEntry entry;
+            while ((entry = zis.getNextEntry()) != null) {
+                String name = entry.getName();
+                // Rename the top-level directory
+                if (name.startsWith(packageId + "/")) {
+                    name = originalPath + "/" + name.substring(packageId.length() + 1);
+                } else if (name.equals(packageId + "/")) {
+                    name = originalPath + "/";
+                }
+                java.util.zip.ZipEntry newEntry = new java.util.zip.ZipEntry(name);
+                zos.putNextEntry(newEntry);
+                if (!entry.isDirectory()) {
+                    zis.transferTo(zos);
+                }
+                zos.closeEntry();
+            }
+        }
+
+        logger.info("Community Store: repacked ZIP, renamed directory from " + packageId + " to " + originalPath);
+        return baos.toByteArray();
     }
 }
