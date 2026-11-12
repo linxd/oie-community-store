@@ -1,7 +1,7 @@
 {
     "id": "community-store",
     "name": "社区商店",
-    "version": "0.8.1",
+    "version": "0.8.2",
     "author": "Chris Gibson",
     "description": "从 GitHub 发布版中浏览、安装和更新社区插件，由引擎在 manage-extensions 权限下校验并安装。",
     "enabled": true,

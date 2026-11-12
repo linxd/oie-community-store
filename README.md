@@ -1,5 +1,7 @@
 # OIE 社区商店
 
+0.8.2 版正在准备中，引擎兼容性限定为 OIE **4.6.0 和 4.7.0**。在最终 4.7.0 版上的运行时验证尚待完成；参见[发布准备说明](docs/oie-4.6-4.7-release.md)。
+
 面向 [Open Integration Engine](https://openintegrationengine.org) 的社区包商店，无需项目托管的基础设施。它分发**扩展**（插件、连接器、数据类型——构建好的 `.zip`，通过引擎的扩展安装器安装）和**内容**（通道、代码模板、代码模板库——XML 导出，或纯 `.js` 文件用于代码模板，通过引擎的 API 导入，无需重启）。包来自两种来源：精选的[社区目录](https://github.com/gibson9583/oie-community-catalog)——一个静态的、经 PR 审核的索引，其条目携带位于**任何** https 主机上的构建产物 URL 及其 sha256——以及直接 GitHub 仓库/组织爬取（HACS 风格：每个仓库一个 `oie.json` 清单，构建产物在 GitHub Releases 上）作为零配置的发布者入门通道。无论哪种方式，引擎都会自行下载、sha256 验证并安装一切。
 
 ## 管理员体验
